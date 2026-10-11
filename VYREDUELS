@@ -336,7 +336,7 @@ Config = {
 	warningE01Scale = 1,
 	bgMode = "image",
 	fontStyle = "VYRE Original",
-	billboardScale = 1,
+	billboardScale = 0.5,
 	statsBarEnabled = false,
 	_getBatTpStuds = function(arg)
 		if (type(arg) == "string" and arg or Config.batTpVersion or "V2") == "V1" then
@@ -3180,7 +3180,7 @@ Config._buildHeadDisplay = function(discord)
 	end
 	discord = createTextLabel("discord.gg/", 20, UDim2.new(0.5, -107, 0, 0), 100, Enum.TextXAlignment.Right)
 	createTextLabel("v", 20, UDim2.new(0.5, -7, 0, 0), 14, Enum.TextXAlignment.Center)
-	createTextLabel("yre", 20, UDim2.new(0.5, 7, 0, 0), 80, Enum.TextXAlignment.Left)
+	createTextLabel("yrehub", 20, UDim2.new(0.5, 7, 0, 0), 80, Enum.TextXAlignment.Left)
 	createTextLabel = Instance.new("Frame", frame)
 	createTextLabel.Size = UDim2.new(0.85, 0, 0, 0)
 	createTextLabel.AnchorPoint = Vector2.new(0.5, 0)
@@ -3711,7 +3711,7 @@ local function fn31()
 		stealBarScale = Config.stealBarScale or 1,
 		stealBarStyle = Config.stealBarStyle or "Compact",
 		fontStyle = Config.fontStyle or "VYRE Original",
-		billboardScale = Config.billboardScale or 1,
+		billboardScale = Config.billboardScale or 0.5,
 		statsBarEnabled = false,
 		fovEnabled = Config.fovEnabled or false,
 		fovValue = Config.fovValue or 80,
@@ -3793,7 +3793,7 @@ local function fn33()
 		lockButtonsEnabled = Config.lockButtonsEnabled or false,
 		uiLocked = Config.uiLocked or false,
 		fontStyle = Config.fontStyle or "VYRE Original",
-		billboardScale = Config.billboardScale or 1,
+		billboardScale = Config.billboardScale or 0.5,
 		statsBarEnabled = false,
 		speedKey = tbl11.speed and tbl11.speed.Name or (Config._speedKeyCleared and "_cleared_" or nil),
 		guiHideKey = tbl11.guiHide and tbl11.guiHide.Name or "_cleared_",
@@ -9673,7 +9673,7 @@ tbl31 = {
 										or arg.Text == "discord.gg/vyrehub"
 										or arg.Text == "discord.gg/"
 										or arg.Text == "v"
-										or arg.Text == "x7hub"
+										or arg.Text == "yrehub"
 										or arg == tbl27.speed
 									then "brand"
 									else (Config._theme.nearest(
@@ -11514,7 +11514,7 @@ tbl31 = {
 		end
 		function makeSpeedRow(text, text2, arg, arg2, arg3, arg4, arg5, arg6, arg7)
 			local frame6 = Instance.new("Frame", v43)
-			frame6.Size = UDim2.new(1, 0, 0, 48)
+			frame6.Size = UDim2.new(1, 0, 0, 56)
 			frame6.BorderSizePixel = 0
 			frame6.LayoutOrder = LO()
 			frame6.BackgroundColor3 = glass.panel
@@ -11558,8 +11558,8 @@ tbl31 = {
 			text.TextSize = 8
 			text.TextXAlignment = Enum.TextXAlignment.Left
 			arg3 = Instance.new("TextLabel", frame6)
-			arg3.Size = UDim2.new(0, 48, 0, 11)
-			arg3.Position = UDim2.new(1, -108, 0, 5)
+			arg3.Size = UDim2.new(0, 62, 0, 12)
+            arg3.Position = UDim2.new(1, -140, 0, 6)
 			arg3.BackgroundTransparency = 1
 			arg3.Text = "NORMAL"
 			arg3.TextColor3 = glass.muted
@@ -11567,18 +11567,18 @@ tbl31 = {
 			arg3.TextSize = 7
 			arg3.TextXAlignment = Enum.TextXAlignment.Center
 			text = Instance.new("TextLabel", frame6)
-			text.Size = UDim2.new(0, 48, 0, 11)
-			text.Position = UDim2.new(1, -55, 0, 5)
+			text.Size = UDim2.new(0, 62, 0, 12)
+            text.Position = UDim2.new(1, -72, 0, 6)
 			text.BackgroundTransparency = 1
-			text.Text = "STEAL"
+			text.Text = "CARRY"
 			text.TextColor3 = glass.muted
 			text.Font = Enum.Font.GothamBold
 			text.TextSize = 7
 			text.TextXAlignment = Enum.TextXAlignment.Center
 			text2 = Instance.new("Frame", frame6)
 			text2.Name = "SpeedBoxWrap"
-			text2.Size = UDim2.new(0, 48, 0, 28)
-			text2.Position = UDim2.new(1, -108, 0, 21)
+			text2.Size = UDim2.new(0, 62, 0, 28)
+            text2.Position = UDim2.new(1, -140, 0, 22)
 			text2.BackgroundColor3 = glass.panel
 			text2.BackgroundTransparency = 0.12
 			text2.BorderSizePixel = 0
@@ -11587,8 +11587,8 @@ tbl31 = {
 			mkStroke(text2, glass.border, 0.6)
 			arg3 = Instance.new("Frame", frame6)
 			arg3.Name = "SpeedBoxWrap"
-			arg3.Size = UDim2.new(0, 48, 0, 28)
-			arg3.Position = UDim2.new(1, -55, 0, 21)
+			arg3.Size = UDim2.new(0, 62, 0, 28)
+            arg3.Position = UDim2.new(1, -72, 0, 22)
 			arg3.BackgroundColor3 = glass.panel
 			arg3.BackgroundTransparency = 0.12
 			arg3.BorderSizePixel = 0
@@ -11666,7 +11666,7 @@ tbl31 = {
 			local frame9 = Instance.new("Frame", frame6)
 			frame9.Size = UDim2.new(0, 30, 0, 26)
 			frame9.AnchorPoint = Vector2.new(0.5, 0.5)
-			frame9.Position = UDim2.new(1, -137, 0.5, 0)
+			frame9.Position = UDim2.new(1, -180, 0.5, 0)
 			frame9.BackgroundColor3 = glass.panel
 			frame9.BackgroundTransparency = 0.28
 			frame9.BorderSizePixel = 0
@@ -13046,30 +13046,6 @@ tbl31 = {
 				textLabel2.Activated:Connect(fn81)
 			end
 			do
-				makeGap(1)
-				local v45 = Config._makeSettingsRow(Frame)
-				local textLabel2 = Instance.new("TextLabel", v45)
-				textLabel2.Size = UDim2.new(1, -192, 1, 0)
-				textLabel2.Position = UDim2.new(0, 14, 0, 0)
-				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Auto Play Version"
-				textLabel2.TextColor3 = Color3.fromRGB(200, 200, 200)
-				textLabel2.Font = Enum.Font.GothamBold
-				textLabel2.TextSize = 12
-				textLabel2.TextXAlignment = Enum.TextXAlignment.Left
-				local n20 = Config.autoPlayVersion == "V1" and 1 or 2
-				makeChoiceControl(v45, { "V1", "V2" }, n20, function(autoPlayVersion, arg)
-					local autoPlayVersion2 = Config.autoPlayVersion
-					n20 = arg
-					Config.autoPlayVersion = autoPlayVersion
-					arg = autoPlayVersion2 == "V2" and autoPlayVersion == "V1"
-					if arg then
-						flag13 = false
-					end
-					fn34()
-				end)
-			end
-			do
 				local v45 = Config._makeSettingsRow(Frame)
 				local textLabel2 = Instance.new("TextLabel", v45)
 				textLabel2.Size = UDim2.new(1, -192, 1, 0)
@@ -13151,7 +13127,7 @@ tbl31 = {
 				textLabel2.Size = UDim2.new(1, -90, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Trigger Height"
+				textLabel2.Text = "Auto Tp Down Radius"
 				textLabel2.TextColor3 = Color3.fromRGB(200, 200, 200)
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -13250,7 +13226,7 @@ tbl31 = {
 					textLabel2.Size = UDim2.new(1, -74, 1, 0)
 					textLabel2.Position = UDim2.new(0, 14, 0, 0)
 					textLabel2.BackgroundTransparency = 1
-					textLabel2.Text = "Radio"
+					textLabel2.Text = "Radius"
 					textLabel2.TextColor3 = Color3.fromRGB(200, 200, 200)
 					textLabel2.Font = Enum.Font.GothamBold
 					textLabel2.TextSize = 12
@@ -13300,7 +13276,7 @@ tbl31 = {
 					textLabel2.Size = UDim2.new(1, -24, 1, 0)
 					textLabel2.Position = UDim2.new(0, 14, 0, 0)
 					textLabel2.BackgroundTransparency = 1
-					textLabel2.Text = "Auto Grab Pause"
+					textLabel2.Text = "Steal Stop"
 					textLabel2.TextColor3 = Color3.fromRGB(200, 200, 200)
 					textLabel2.Font = Enum.Font.GothamBold
 					textLabel2.TextSize = 12
@@ -13483,7 +13459,7 @@ tbl31 = {
 				textLabel5.Size = UDim2.new(1, -54, 1, 0)
 				textLabel5.Position = UDim2.new(0, 14, 0, 0)
 				textLabel5.BackgroundTransparency = 1
-				textLabel5.Text = "Player Anim"
+				textLabel5.Text = "Player Animations"
 				textLabel5.TextColor3 = playerAnimEnabled and glass.text or glass.muted
 				textLabel5.Font = Enum.Font.GothamBold
 				textLabel5.TextSize = 12
@@ -13536,7 +13512,7 @@ tbl31 = {
 				textLabel2.Size = UDim2.new(0, 122, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Player Anim Mode"
+				textLabel2.Text = "Player Animation Mode"
 				textLabel2.TextColor3 = Color3.fromRGB(200, 200, 200)
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -15528,7 +15504,7 @@ tbl31 = {
 				end
 			end
 			makeGap(2)
-			makeSectionHeader("Player")
+			makeSectionHeader("Body Lock")
 			makeGap(2)
 			makeGap(2)
 			local flag14, connection14, v45, humanoidRootPart2, humanoid2, fn82 = false
@@ -15724,32 +15700,6 @@ tbl31 = {
 				frame6 = Instance.new("Frame", uiListLayout2)
 				frame6.Size = UDim2.new(1, 0, 0, 40)
 				frame6.BorderSizePixel = 0
-				frame6.LayoutOrder = 2
-				frame6.BackgroundColor3 = glass.panel
-				frame6.BackgroundTransparency = 0.4
-				mkCorner(frame6, 10)
-				mkAnimStroke(frame6, 1)
-				uiListLayout = Instance.new("TextLabel", frame6)
-				uiListLayout.Size = UDim2.new(1, -54, 1, 0)
-				uiListLayout.Position = UDim2.new(0, 14, 0, 0)
-				uiListLayout.BackgroundTransparency = 1
-				uiListLayout.Text = "Body Mode"
-				uiListLayout.TextColor3 = Color3.fromRGB(200, 200, 200)
-				uiListLayout.Font = Enum.Font.GothamBold
-				uiListLayout.TextSize = 12
-				uiListLayout.TextXAlignment = Enum.TextXAlignment.Left
-				local n20 = Config.sbaEnemyPerm and not Config.sbaEnemyRadio and 1 or 2
-				makeChoiceControl(frame6, { "Body Perm", "Body Radio" }, n20, function(arg, arg2)
-					n20 = arg2
-					Config.sbaEnemyPerm = arg == "Body Perm"
-					Config.sbaEnemyRadio = arg == "Body Radio"
-					fn34()
-				end)
-			end
-			do
-				frame6 = Instance.new("Frame", uiListLayout2)
-				frame6.Size = UDim2.new(1, 0, 0, 40)
-				frame6.BorderSizePixel = 0
 				frame6.LayoutOrder = 3
 				frame6.BackgroundColor3 = glass.panel
 				frame6.BackgroundTransparency = 0.4
@@ -15894,7 +15844,7 @@ tbl31 = {
 				textLabel2.Size = UDim2.new(0, 110, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Potato Graphics"
+				textLabel2.Text = "Nuke Optimizer"
 				textLabel2.TextColor3 = potatoGraphicsEnabled and glass.text or glass.muted
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -17089,7 +17039,7 @@ tbl31 = {
 				textLabel2.Size = UDim2.new(0, 110, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "ESP Lines"
+				textLabel2.Text = "Tracer"
 				textLabel2.TextColor3 = espLineEnabled2 and glass.text or glass.muted
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -19302,7 +19252,7 @@ tbl31 = {
 				fn34()
 			end)
 			makeGap(8)
-			makeSectionHeader("Appearance")
+			makeSectionHeader("Scale")
 			makeGap(2)
 			uiScaleBox = makeInputRow("UI Scale", Config.uiScale, function(uiScale2)
 				if uiScale2 >= 0.5 and uiScale2 <= 1.25 then
@@ -19790,7 +19740,7 @@ tbl31 = {
 				textLabel2.Size = UDim2.new(1, -104, 1, 0)
 				textLabel2.Position = UDim2.new(0, 14, 0, 0)
 				textLabel2.BackgroundTransparency = 1
-				textLabel2.Text = "Restore Positions"
+				textLabel2.Text = "Reset Buttons Positions"
 				textLabel2.TextColor3 = Color3.fromRGB(200, 200, 200)
 				textLabel2.Font = Enum.Font.GothamBold
 				textLabel2.TextSize = 12
@@ -22739,7 +22689,7 @@ tbl31 = {
 			makeGap(6)
 			buildMovementFeatures()
 			makeGap(6)
-			makeSectionHeader("Extras")
+			makeSectionHeader("Player")
 			makeGap(2)
 			do
 				local flag14, frame6 = Config.duelAntiDieEnabled == true, Instance.new("Frame", v43)
@@ -27589,7 +27539,7 @@ tbl31 = {
 							n24 = tbl27.frame
 							if n24 then
 								if v49 then
-									local scale = tbl27.scale and tbl27.scale.Scale or (Config.billboardScale or 1)
+									local scale = tbl27.scale and tbl27.scale.Scale or (Config.billboardScale or 0.5)
 									local n25, n26 =
 										math.floor(v48.X) - math.floor(120 * scale),
 										math.floor(v48.Y) - math.floor(76 * scale)
