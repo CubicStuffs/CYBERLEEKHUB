@@ -1,21 +1,14 @@
 --[[
-    VYRE CODE SNIPER — v20 Build
-    + BLUE theme (was purple)
-    + Removed shake on tab switch (smooth)
-    + Webhook queue: batched + deduped + rate-limit safe
-    + All previous features preserved
-    + Series 2 Minifigures riddle (GRIFFIN) + many variants
-    + Haunted Fuse riddle
-    + Birth date / DOB riddle
-    + Color riddles: StrawberryElephant(Red), JohnPork(Pink), SkibidiToilet(White), Meowl(Brown)
-    + FIX: MemoryBank no longer poisons riddles (JOHN bug)
+    VYRE CODE SNIPER — v21 Build
+    + BLUE theme
+    + Series 2 Minifigures (GRIFFIN)
+    + Haunted Fuse / Best Fuse (PHOENIX)
+    + Color riddles (StrawberryElephant/JohnPork/SkibidiToilet/Meowl)
+    + Birth date / DOB
+    + Multi-word code combine: "Code is Meowl Jandel 666" → MEOWLJANDEL666
+    + Grow A Garden ex owner/admin → JANDEL
+    + FIX: MemoryBank no longer poisons riddles
 --]]
-
--- ============================================================
--- ============================================================
--- CODE SNIPER
--- ============================================================
--- ============================================================
 
 local cloneref = cloneref or function(o) return o end
 local Players = cloneref(game:GetService("Players"))
@@ -68,7 +61,6 @@ local BRAINROT_KNOWLEDGE = {
     {p={"what is my full name","whats my full name","my full name","full name","what is sammys full name","whats sammys full name","sammys full name","sammy full name","what is your full name","whats your full name","your full name","the full name","what is my real full name","full name of sammy","full name of sammys","full name of the developer","the developers full name","sammys real full name","full name of sammys real name","what is sammys real full name","whats sammys real full name","tell me my full name","give me my full name"},a="SAMUEL"},
     {p={"year when i started developing","year i started developing","when did i start developing","when did sammy start developing","year sammy started developing","started developing year","year of developing start","what year did i start developing","what year did sammy start developing","when did sammy start making games","year started making games","when did i start making games","start developing year","when i started developing","year i began developing","when did sammy begin developing","begin developing","started game development","when did sammy start developing games","what year did sammy start making games","when did the developer start developing","year the developer started developing","when did the developer start making games","when did sammy begin","when did i begin developing","year sammy began developing","sammy started developing","sammy developing year","started developing","started game dev","when did sammy start his journey"},a="2013"},
     {p={"rarest brainrot","what is the rarest brainrot","whats the rarest brainrot","the rarest brainrot","which brainrot is the rarest","most rarest brainrot","rarest brainrot in game","rarest brainrot in sab","rarest brainrot in steal a brainrot","rarest brainrot currently","rarest brainrot now","what brainrot is the rarest","which is the rarest brainrot","tell me the rarest brainrot","name the rarest brainrot","rarest brainrot ever","the most rarest brainrot","the rarest one","which one is rarest","what is rarest brainrot","whats rarest brainrot","rarest of all","rarest brainrot of all time","most rare brainrot","which brainrot is most rare","rarest brainrot in the game","the rarest brainrot in sab","most rare brainrot in the game","rarest br","rarest in sab","rarest steal a brainrot","most rare steal a brainrot","rarest of them all","the rarest brainrot in the game","which is the most rare brainrot","tell me the rarest","rarest brainrot here","number 1 rarest brainrot","rarest brainrot overall","overall rarest brainrot","the overall rarest brainrot","rarest brainrot in sab overall"},a="POLAROIDINI"},
-        -- ⭐ RAREST OF THIS UPDATE = DRAGON SKELETONINI
     {p={
         "rarest brainrot of this update","rarest brainrot of the update",
         "rarest brainrot of update","rarest brainrot this update",
@@ -107,8 +99,6 @@ local BRAINROT_KNOWLEDGE = {
         "which brainrot was added as the rarest","rarest brainrot from the latest update",
         "rarest brainrot of the latest update","rarest of the latest update"
     },a="DRAGONSKELETONINI"},
-
-    -- ⭐ DRAGON SKELETONINI direct variations
     {p={
         "dragon skeletonini","what is dragon skeletonini","whats dragon skeletonini",
         "tell me about dragon skeletonini","dragon skeletonini info",
@@ -130,6 +120,45 @@ local BRAINROT_KNOWLEDGE = {
     {p={"phoenix income","how much does phoenix earn","phoenix per sec","phoenix per second","phoenix earn","phoenix earns","phoenix money","phoenix value","phoenix income per second","how much money does phoenix make","phoenix cash","phoenix cps","how much phoenix earns","phoenix earning","phoenix rate","phoenix income per sec","what is phoenix income","whats phoenix income","what is phoenix per second","whats phoenix per second","phoenix money per sec","phoenix earn per sec","income of phoenix","phoenix profit"},a="425M"},
     {p={"what does phoenix look like","phoenix model","phoenix appearance","how does phoenix look","phoenix type","phoenix animal","what animal is phoenix","phoenix bird","is phoenix a bird","is phoenix a fire bird","phoenix fire bird","phoenix a bird","what animal is the phoenix","which animal is phoenix","phoenix species","what species is phoenix","phoenix firebird","fire bird phoenix"},a="FIREBIRD"},
     {p={"my skin colour","my skin color","what is my skin colour","what is my skin color","whats my skin colour","whats my skin color","skin colour","skin color","my skin tone","what is my skin tone","whats my skin tone","skin tone","colour of my skin","color of my skin","my skin","what colour is my skin","what color is my skin","sammy skin colour","sammy skin color","sammy skin tone","sammy skin","what colour am i","what color am i"},a="RED"},
+    -- ⭐ AVATAR COLOR → RED
+    {p={
+        "what is my avatar color","whats my avatar color","what is my avatar colour","whats my avatar colour",
+        "what color is my avatar","what colour is my avatar","what is the color of my avatar","whats the color of my avatar",
+        "what is the colour of my avatar","whats the colour of my avatar","which color is my avatar","which colour is my avatar",
+        "my avatar color","my avatar colour","avatar color","avatar colour","color of my avatar","colour of my avatar",
+        "color of the avatar","colour of the avatar","the avatar color","the avatar colour","avatar color sab","avatar colour sab",
+        "what color am i in sab","what colour am i in sab","what is my avatar color in sab","whats my avatar color in sab",
+        "sammy avatar color","sammy avatar colour","sammys avatar color","sammys avatar colour",
+    },a="RED"},
+    -- ⭐ SHIRT COLOR → RED
+    {p={
+        "what is my shirt color","whats my shirt color","what is my shirt colour","whats my shirt colour",
+        "what color is my shirt","what colour is my shirt","what is the color of my shirt","whats the color of my shirt",
+        "what is the colour of my shirt","whats the colour of my shirt","which color is my shirt","which colour is my shirt",
+        "my shirt color","my shirt colour","shirt color","shirt colour","color of my shirt","colour of my shirt",
+        "color of the shirt","colour of the shirt","the shirt color","the shirt colour","shirt color sab","shirt colour sab",
+        "what color is my top","what colour is my top","my top color","my top colour","top color","top colour",
+        "sammy shirt color","sammy shirt colour","sammys shirt color","sammys shirt colour",
+        "sammy top color","sammy top colour","what color shirt am i wearing","what colour shirt am i wearing",
+        "what shirt am i wearing","shirt i am wearing","my shirt","what is my shirt",
+    },a="RED"},
+    -- ⭐ PANT / PANTS COLOR → RED
+    {p={
+        "what is my pant color","whats my pant color","what is my pant colour","whats my pant colour",
+        "what is my pants color","whats my pants color","what is my pants colour","whats my pants colour",
+        "what color is my pant","what colour is my pant","what color is my pants","what colour is my pants",
+        "what is the color of my pant","whats the color of my pant","what is the color of my pants","whats the color of my pants",
+        "what is the colour of my pant","whats the colour of my pant","what is the colour of my pants","whats the colour of my pants",
+        "which color is my pant","which colour is my pant","which color is my pants","which colour is my pants",
+        "my pant color","my pant colour","my pants color","my pants colour","pant color","pant colour","pants color","pants colour",
+        "color of my pant","colour of my pant","color of my pants","colour of my pants",
+        "color of the pant","colour of the pant","color of the pants","colour of the pants",
+        "the pant color","the pant colour","the pants color","the pants colour",
+        "pant color sab","pants color sab","pant colour sab","pants colour sab",
+        "what pant am i wearing","what pants am i wearing","my pant","my pants","what is my pant","what is my pants",
+        "sammy pant color","sammy pants color","sammy pant colour","sammy pants colour",
+        "sammys pant color","sammys pants color","sammys pant colour","sammys pants colour",
+    },a="RED"},
     {p={"my real life last name","my real last name","my last name","real life last name","real last name","last name","my irl last name","irl last name","my actual last name","actual last name","my family name","family name","my surname","surname","sammy last name","sammys last name","what is my last name","whats my last name","what is my surname","whats my surname"},a="BRAKTA"},
     {p={"day of the month tomorrow","what day is tomorrow","whats the day tomorrow","tomorrows day","tomorrow date","whats tomorrows date","date tomorrow","tomorrow number","tomorrow day number","which day tomorrow","tomorrow day","day tomorrow","tomorrow day of the month"},a=TOMORROW_DAY_STR},
     {p={"what day is today","what day is it today","what day today","whats today day","whats the day today","what day of month is it","what is today day","today day number","todays day number","day number today","which day is today","which day is it today","what day of the month today","what is todays day","todays day","today day","what day is it","which day today","which day are we in","today number","day today","what date is today","whats the date today","date today","todays date","what is todays date","current date","what is the date","whats the date","day of the month","what is the day of the month","which day of the month"},a=TODAY_DAY_STR},
@@ -158,6 +187,370 @@ local BRAINROT_KNOWLEDGE = {
     {p={"sammys real name","sammy real name","what is sammys real name","sammy actual name","real name of sammy","real name of sammys"},a="SPYDERSAMMY"},
     {p={"which country is sammy from","what country is sammy from","sammy from which country","sammy country of origin"},a="BRAZIL"},
     {p={"sammys rival","who is sammys rival","sammy rival","who is sammys enemy","sammy enemy"},a="JANDEL"},
+    {p={"jandel","who is jandel","who's jandel","whos jandel","the jandel","jandel sab","jandel brainrot","jandel info","tell me about jandel","what is jandel","whats jandel"},a="JANDEL"},
+    -- ⭐ HAUNTED FUSE RELEASE DATE
+    {p={
+        "when was haunted fuse released","haunted fuse release date","when haunted fuse released","when did haunted fuse release",
+        "haunted fuse released","when was the haunted fuse released","haunted fuse added date","when was haunted fuse added",
+        "haunted fuse maded when","when was haunted fuse maded","what date haunted fuse released","haunted fuse launch date",
+        "haunted fuse released date","release date of haunted fuse","haunted fuse released when","when did haunted fuse come out",
+        "what date was haunted fuse released","when was haunted fuse created","haunted fuse creation date","haunted fuse added when",
+    },a="OCTOBER32026"},
+    -- ⭐ SANTA'S FUSE RELEASE DATE
+    {p={
+        "when was santas fuse released","santas fuse release date","when santas fuse released","when did santas fuse release",
+        "santas fuse released","when was the santas fuse released","santas fuse added date","when was santas fuse added",
+        "santa fuse release date","when was santa fuse released","santa fuse released","santa fuse added date",
+        "santas fuse maded when","when was santas fuse maded","what date santas fuse released","santas fuse launch date",
+        "release date of santas fuse","when did santas fuse come out","what date was santas fuse released","santa fuse launch date",
+    },a="DECEMBER142025"},
+    -- ⭐ CUPID'S MACHINE RELEASE DATE
+    {p={
+        "when was cupids machine released","cupids machine release date","when cupids machine released","when did cupids machine release",
+        "cupids machine released","when was the cupids machine released","cupids machine added date","when was cupids machine added",
+        "cupid machine release date","when was cupid machine released","cupid machine released","cupid machine added date",
+        "cupids machine maded when","when was cupids machine maded","what date cupids machine released","cupids machine launch date",
+        "release date of cupids machine","when did cupids machine come out","what date was cupids machine released","cupid machine launch date",
+    },a="FEBRUARY142026"},
+    -- ⭐ TRADE MACHINE RELEASE DATE
+    {p={
+        "when was trade machine released","trade machine release date","when trade machine released","when did trade machine release",
+        "trade machine released","when was the trade machine released","trade machine added date","when was trade machine added",
+        "trade machine maded when","when was trade machine maded","what date trade machine released","trade machine launch date",
+        "release date of trade machine","when did trade machine come out","what date was trade machine released","trade machine creation date",
+        "when was trade machine created","trade machine added when",
+    },a="JANUARY102026"},
+    -- ⭐ DIVINE FUSE RELEASE DATE
+    {p={
+        "when was divine fuse released","divine fuse release date","when divine fuse released","when did divine fuse release",
+        "divine fuse released","when was the divine fuse released","divine fuse added date","when was divine fuse added",
+        "divine fuse maded when","when was divine fuse maded","what date divine fuse released","divine fuse launch date",
+        "release date of divine fuse","when did divine fuse come out","what date was divine fuse released","divine fuse creation date",
+        "when was divine fuse created",
+    },a="MARCH72026"},
+    -- ⭐ EGG INCUBATOR RELEASE DATE
+    {p={
+        "when was egg incubator released","egg incubator release date","when egg incubator released","when did egg incubator release",
+        "egg incubator released","when was the egg incubator released","egg incubator added date","when was egg incubator added",
+        "egg incubator maded when","when was egg incubator maded","what date egg incubator released","egg incubator launch date",
+        "release date of egg incubator","when did egg incubator come out","what date was egg incubator released","eggincubator release date",
+    },a="JANUARY172026"},
+    -- ⭐ CYBER CRAFT RELEASE DATE
+    {p={
+        "when was cyber craft released","cyber craft release date","when cyber craft released","when did cyber craft release",
+        "cyber craft released","when was the cyber craft released","cyber craft added date","when was cyber craft added",
+        "cyber craft maded when","when was cyber craft maded","what date cyber craft released","cyber craft launch date",
+        "release date of cyber craft","when did cyber craft come out","what date was cyber craft released","cybercraft release date",
+        "cyber craft machine release date","when was cybercraft released",
+    },a="JANUARY312026"},
+    -- ⭐ SUMMER FUSE RELEASE DATE
+    {p={
+        "when was summer fuse released","summer fuse release date","when summer fuse released","when did summer fuse release",
+        "summer fuse released","when was the summer fuse released","summer fuse added date","when was summer fuse added",
+        "summer fuse maded when","when was summer fuse maded","what date summer fuse released","summer fuse launch date",
+        "release date of summer fuse","when did summer fuse come out","what date was summer fuse released",
+    },a="JUNE132026"},
+    -- ⭐ BRAINROT DEALER RELEASE DATE
+    {p={
+        "when was brainrot dealer released","brainrot dealer release date","when brainrot dealer released","when did brainrot dealer release",
+        "brainrot dealer released","when was the brainrot dealer released","brainrot dealer added date","when was brainrot dealer added",
+        "brainrot dealer maded when","when was brainrot dealer maded","what date brainrot dealer released","brainrot dealer launch date",
+        "release date of brainrot dealer","when did brainrot dealer come out","what date was brainrot dealer released",
+    },a="AUGUST302025"},
+    -- ⭐ BRAINROT TRADER RELEASE DATE
+    {p={
+        "when was brainrot trader released","brainrot trader release date","when brainrot trader released","when did brainrot trader release",
+        "brainrot trader released","when was the brainrot trader released","brainrot trader added date","when was brainrot trader added",
+        "brainrot trader maded when","when was brainrot trader maded","what date brainrot trader released","brainrot trader launch date",
+        "release date of brainrot trader","when did brainrot trader come out","what date was brainrot trader released",
+    },a="NOVEMBER292025"},
+    -- ⭐ RAINBOW MACHINE RELEASE DATE
+    {p={
+        "when was rainbow machine released","rainbow machine release date","when rainbow machine released","when did rainbow machine release",
+        "rainbow machine released","when was the rainbow machine released","rainbow machine added date","when was rainbow machine added",
+        "rainbow machine maded when","when was rainbow machine maded","what date rainbow machine released","rainbow machine launch date",
+        "release date of rainbow machine","when did rainbow machine come out","what date was rainbow machine released",
+    },a="JULY42025"},
+    -- ⭐ BUBBLEGUM MACHINE RELEASE DATE
+    {p={
+        "when was bubblegum machine released","bubblegum machine release date","when bubblegum machine released","when did bubblegum machine release",
+        "bubblegum machine released","when was the bubblegum machine released","bubblegum machine added date","when was bubblegum machine added",
+        "bubblegum machine maded when","when was bubblegum machine maded","what date bubblegum machine released","bubblegum machine launch date",
+        "release date of bubblegum machine","when did bubblegum machine come out","what date was bubblegum machine released",
+    },a="NOVEMBER152025"},
+    -- ⭐ WITCH FUSE RELEASE DATE
+    {p={
+        "when was witch fuse released","witch fuse release date","when witch fuse released","when did witch fuse release",
+        "witch fuse released","when was the witch fuse released","witch fuse added date","when was witch fuse added",
+        "witch fuse maded when","when was witch fuse maded","what date witch fuse released","witch fuse launch date",
+        "release date of witch fuse","when did witch fuse come out","what date was witch fuse released",
+    },a="OCTOBER112025"},
+    -- ⭐ SANTA'S SHOP RELEASE DATE
+    {p={
+        "when was santas shop released","santas shop release date","when santas shop released","when did santas shop release",
+        "santas shop released","when was the santas shop released","santas shop added date","when was santas shop added",
+        "santa shop release date","when was santa shop released","santa shop released","santa shop added date",
+        "santas shop maded when","when was santas shop maded","what date santas shop released","santas shop launch date",
+        "release date of santas shop","when did santas shop come out","what date was santas shop released",
+    },a="DECEMBER202025"},
+    -- ⭐ MEOWL INCOME
+    {p={
+        "meowl income","how much does meowl earn","meowl per sec","meowl per second","meowl earn","meowl earns",
+        "meowl money","meowl value","meowl income per second","how much money does meowl make","meowl cash","meowl cps",
+        "meowl rate","meowl income per sec","what is meowl income","whats meowl income","what is meowl per second",
+        "meowl money per sec","meowl earn per sec","income of meowl","meowl profit","how much does meowl make",
+        "meowl earning","how much meowl earns","how much is meowl","meowl price","meowl cost",
+    },a="600M"},
+    -- ⭐ GRIFFIN INCOME
+    {p={
+        "griffin income","how much does griffin earn","griffin per sec","griffin per second","griffin earn","griffin earns",
+        "griffin money","griffin value","griffin income per second","how much money does griffin make","griffin cash","griffin cps",
+        "griffin rate","griffin income per sec","what is griffin income","whats griffin income","what is griffin per second",
+        "griffin money per sec","griffin earn per sec","income of griffin","griffin profit","how much does griffin make",
+        "griffin earning","how much griffin earns","how much is griffin","griffin price","griffin cost",
+    },a="400M"},
+    -- ⭐ DRAGON SKELETONINI INCOME
+    {p={
+        "dragon skeletonini income","how much does dragon skeletonini earn","dragon skeletonini per sec",
+        "dragon skeletonini per second","dragon skeletonini earn","dragon skeletonini earns","dragon skeletonini money",
+        "dragon skeletonini value","how much does dragon skeletonini make","dragon skeletonini earn per sec",
+        "what does dragon skeletonini earn","income of dragon skeletonini","per sec of dragon skeletonini",
+        "dragon skeletonini money per sec","dragon skeletonini cps","dragon skeletonini rate","dragon skeletonini profit",
+        "how much is dragon skeletonini","dragon skeletonini price","dragon skeletonini cost",
+    },a="325M"},
+    -- ⭐ POLAROIDINI INCOME
+    {p={
+        "polaroidini income","how much does polaroidini earn","polaroidini per sec","polaroidini per second",
+        "polaroidini earn","polaroidini earns","polaroidini money","polaroidini value","how much money does polaroidini make",
+        "polaroidini cps","polaroidini rate","polaroidini income per sec","what is polaroidini income",
+        "income of polaroidini","polaroidini profit","how much does polaroidini make","how much is polaroidini",
+    },a="55M"},
+    -- ⭐ SKIBIDI TOILET INCOME
+    {p={
+        "skibidi toilet income","how much does skibidi toilet earn","skibidi toilet per sec","skibidi toilet per second",
+        "skibidi toilet earn","skibidi toilet earns","skibidi toilet money","skibidi toilet value",
+        "how much money does skibidi toilet make","skibidi toilet cps","skibidi toilet rate","skibidi toilet income per sec",
+        "what is skibidi toilet income","income of skibidi toilet","skibidi toilet profit","how much does skibidi toilet make",
+        "how much is skibidi toilet",
+    },a="350M"},
+    -- ⭐ JOHNPORK INCOME
+    {p={
+        "johnpork income","john pork income","how much does johnpork earn","how much does john pork earn",
+        "johnpork per sec","john pork per sec","johnpork per second","johnpork earn","johnpork earns",
+        "johnpork money","johnpork value","how much money does johnpork make","johnpork cps","johnpork rate",
+        "johnpork income per sec","what is johnpork income","income of johnpork","johnpork profit",
+        "how much does johnpork make","how much is johnpork",
+    },a="500M"},
+    -- ⭐ STRAWBERRY ELEPHANT INCOME
+    {p={
+        "strawberry elephant income","how much does strawberry elephant earn","strawberry elephant per sec",
+        "strawberry elephant per second","strawberry elephant earn","strawberry elephant earns",
+        "strawberry elephant money","strawberry elephant value","how much money does strawberry elephant make",
+        "strawberry elephant cps","strawberry elephant rate","strawberry elephant income per sec",
+        "what is strawberry elephant income","income of strawberry elephant","strawberry elephant profit",
+        "how much does strawberry elephant make","how much is strawberry elephant",
+    },a="750M"},
+    -- ⭐ MEOWL ANIMAL → CAT
+    {p={
+        "what animal is meowl","which animal is meowl","meowl animal","meowl species","what species is meowl",
+        "what kind of animal is meowl","meowl type","meowl what animal","what type of animal is meowl",
+    },a="CAT"},
+    -- ⭐ SKIBIDI TOILET ANIMAL → TOILET
+    {p={
+        "what animal is skibidi toilet","which animal is skibidi toilet","skibidi toilet animal","skibidi toilet species",
+        "what species is skibidi toilet","what kind of animal is skibidi toilet","skibidi toilet type","what type is skibidi toilet",
+    },a="TOILET"},
+    -- ⭐ STRAWBERRY ELEPHANT ANIMAL → ELEPHANT
+    {p={
+        "what animal is strawberry elephant","which animal is strawberry elephant","strawberry elephant animal",
+        "strawberry elephant species","what species is strawberry elephant","what kind of animal is strawberry elephant",
+        "strawberry elephant type","strawberry elephant what animal",
+    },a="ELEPHANT"},
+    -- ⭐ GRIFFIN ANIMAL → EAGLE
+    {p={
+        "what animal is griffin","which animal is griffin","griffin animal","griffin species","what species is griffin",
+        "what kind of animal is griffin","griffin type","griffin what animal","what type of animal is griffin",
+    },a="EAGLE"},
+    -- ⭐ DRAGON SKELETONINI ANIMAL → DRAGON
+    {p={
+        "what animal is dragon skeletonini","which animal is dragon skeletonini","dragon skeletonini animal",
+        "dragon skeletonini species","what species is dragon skeletonini","what kind of animal is dragon skeletonini",
+        "dragon skeletonini type","dragon skeletonini what animal",
+    },a="DRAGON"},
+    -- ⭐ POLAROIDINI ANIMAL → POLAR BEAR
+    {p={
+        "what animal is polaroidini","which animal is polaroidini","polaroidini animal","polaroidini species",
+        "what species is polaroidini","what kind of animal is polaroidini","polaroidini type","polaroidini what animal",
+    },a="POLARBEAR"},
+    -- ⭐ SAMMY DISCORD USERNAME
+    {p={
+        "sammy discord","sammy discord username","sammy discord tag","sammy discord name","what is sammys discord",
+        "whats sammys discord","sammys discord username","sammys discord tag","sammy discord handle","my discord",
+        "my discord username","my discord tag","my discord name","my discord handle",
+    },a="SPYDERSAMMY"},
+    -- ⭐ SAMMY FAVOURITE YOUTUBER
+    {p={
+        "sammy favourite youtuber","sammy favorite youtuber","what is sammys favourite youtuber","whats sammys favorite youtuber",
+        "my favourite youtuber","my favorite youtuber","sammys favourite youtuber","sammys favorite youtuber",
+        "sammy youtuber","favourite youtuber","favorite youtuber","who is sammys favourite youtuber",
+    },a="STEAK"},
+    -- ⭐ SAMMY ZODIAC
+    {p={
+        "sammy zodiac","sammy rashi","what is sammys zodiac","whats sammys zodiac","sammys zodiac sign","sammy zodiac sign",
+        "my zodiac","my rashi","my zodiac sign","what is my zodiac","whats my zodiac","what is my rashi",
+        "whats my rashi","sammy star sign","my star sign","what is my star sign",
+        -- ⭐ extra explicit forms
+        "what is my zodiac sign","whats my zodiac sign","whats my zodiacs sign","what is my zodiacs sign",
+        "what is my star sign","whats my star sign","what is sammys zodiac sign","whats sammys zodiac sign",
+        "what is sammy zodiac","whats sammy zodiac","what is sammy zodiac sign","whats sammy zodiac sign",
+        "what is sammys star sign","whats sammys star sign","what is sammy rashi","whats sammy rashi",
+        "what is my rashi sign","whats my rashi sign","zodiac sign","what zodiac am i","which zodiac am i",
+        "what zodiac is sammy","which zodiac is sammy","what is sammys zodiac sign","whats my zodiacs sign",
+        "tell me my zodiac","tell me my zodiac sign","tell me my rashi","tell me my star sign",
+    },a="PISCES"},
+    -- ⭐ SAMMY FAVOURITE BRAINROT GAME
+    {p={
+        "sammy favourite brainrot game","sammy favorite brainrot game","sammys favourite game",
+        "sammys favorite game","what is sammys favourite game","whats sammys favorite game",
+        "my favourite brainrot game","my favorite brainrot game","favourite game of sammy","favorite game of sammy",
+    },a="SAB"},
+    -- ⭐ SAMMY FAVOURITE BRAINROT CHARACTER
+    {p={
+        "sammy favourite brainrot character","sammy favorite brainrot character","sammys favourite brainrot",
+        "sammys favorite brainrot","what is sammys favourite brainrot character","whats sammys favorite brainrot character",
+        "my favourite brainrot character","my favorite brainrot character","favourite brainrot of sammy","favorite brainrot of sammy",
+        "sammy favourite brainrot","sammy favorite brainrot","sammys favourite character","sammys favorite character",
+    },a="SAMMYNISPYDERINI"},
+    -- ⭐ SAB CURRENCY NAME
+    {p={
+        "sab currency","sab currency name","what is the currency in sab","what is the currency called in sab",
+        "what is the currency of sab","whats the currency of sab","sab money name","sab coin name",
+        "steal a brainrot currency","steal a brainrot money","what is the money in sab called","currency name",
+        "what currency does sab use","sab cash","what is sab cash called",
+    },a="CASH"},
+    -- ⭐ SAB MAX MONEY
+    {p={
+        "sab max money","max money in sab","what is the max money in sab","whats the max money in sab",
+        "max cash in sab","what is the max cash in sab","maximum money in sab","maximum cash in sab",
+        "sab money cap","sab cash cap","how much max money in sab","max amount of money in sab",
+    },a="999OCTILLION"},
+    -- ⭐ MAX BRAINROTS PER BASE
+    {p={
+        "max brainrots per base","how many brainrots can i have per base","max brainrots in base","base brainrot limit",
+        "how many brainrots fit in a base","brainrot base limit","max brainrots in one base",
+        "how many brainrots per base in sab","how many brainrots in a base in sab","base slot limit",
+    },a="24"},
+    -- ⭐ MAX SLOTS
+    {p={
+        "max slots","sab max slots","how many slots in sab","max slots in sab","maximum slots in sab",
+        "how many slots can you have in sab","base slots max","slot count sab","how many slots does sab have",
+    },a="24"},
+    -- ⭐ MAX REBIRTH REWARD
+    {p={
+        "max rebirth reward","what is the max rebirth reward","sab max rebirth reward","max rebirth multiplier",
+        "highest rebirth reward","max rebirth reward in sab","whats the max rebirth reward","best rebirth reward",
+        "rebirth 19 reward","rebirth 19 multiplier",
+    },a="19XCASHMULTIPLIER"},
+    -- ⭐ SAB YOUTUBE
+    {p={
+        "sab youtube","sammy youtube","sammy youtube channel","sammys youtube","spydersammy youtube",
+        "sammy yt","sammys yt","spyder sammy youtube","sammy youtube channel name","sammys youtube channel",
+        "what is sammys youtube","whats sammys youtube","what is sammys youtube channel","sammy yt channel",
+    },a="@SPYDERSAMMY"},
+    -- ⭐ SAB BIRTHDAY
+    {p={
+        "sab birthday","sab birth date","when is sabs birthday","when is sab birthday","sab born date",
+        "sabs birthday","birthday of sab","sab creation birthday","when was sab born","sab anniversary",
+        "when is the anniversary of sab","sab anniversary date",
+    },a="MAY15"},
+    -- ⭐ SAB ANTI-CHEAT NAME
+    {p={
+        "sab anticheat name","sab anti cheat name","what is sabs anticheat called","anti cheat name in sab",
+        "what is the anticheat in sab called","sab anti-cheat","sab ac name","anticheat name in sab",
+    },a="SABANTICHEAT"},
+    -- ⭐ HOW MANY SECRETS
+    {p={
+        "how many secrets","how many secret brainrots","how many secrets in sab","how many secret brainrots in sab",
+        "total secrets","total secret brainrots","secret count","secret brainrot count","how many secrets are there in sab",
+        "how many secrets does sab have","how many secret brainrots does sab have",
+    },a="270"},
+    -- ⭐ HOW MANY EVENTS
+    {p={
+        "how many events","how many events in sab","how many events are there in sab","how many events does sab have",
+        "total events","event count","events count","total events in sab","how many sab events",
+    },a="24"},
+    -- ⭐ HOW MANY ITEMS
+    {p={
+        "how many items","how many items in sab","how many items are there in sab","how many items does sab have",
+        "total items","item count","items count","total items in sab","how many sab items",
+    },a="36"},
+    -- ⭐ WHERE IS SARI FROM → JAPAN
+    {p={
+        "where is sari from","where sari from","wheres sari from","where is sari","where sari is from","where sari is","where are sari from",
+        "what country is sari from","what country sari from","which country is sari from","which country sari from",
+        "what country is sari","which country is sari","what country does sari live in","which country does sari live in",
+        "what country does sari live","which country does sari live","where does sari live","where does sari live in",
+        "where does sari stay","where does sari stay in","where do you live sari","where do you stay sari",
+        "sari country","sari from","sari country of origin","sari origin","sari home","saris country","saris home",
+        "saris origin","saris location","sari location","saris from","where is saris from","wheres saris from",
+        "where is sari located","where is sari based","sari is from","sari is from which country",
+        "what is saris country","what is sari country","whats saris country","whats sari country",
+        "which country is sari from","which country saris from","where sari originated","what country did sari come from",
+        "sari comes from","where does sari come from","what country does sari come from",
+        "sari nationality","sari from which country","sari country name","sari real country",
+        "where is sari","saris nationality","sari origin country","origin of sari",
+    },a="JAPAN"},
+    -- ⭐ WHERE IS DRAKONITE FROM → ARGENTINA
+    {p={
+        "where is drakonite from","where drakonite from","wheres drakonite from","where is drakonite","where drakonite is from",
+        "where are drakonite from","what country is drakonite from","what country drakonite from",
+        "which country is drakonite from","which country drakonite from","what country is drakonite",
+        "which country is drakonite","what country does drakonite live in","which country does drakonite live in",
+        "what country does drakonite live","which country does drakonite live","where does drakonite live",
+        "where does drakonite live in","where does drakonite stay","where does drakonite stay in",
+        "where do you live drakonite","where do you stay drakonite","drakonite country","drakonite from",
+        "drakonite country of origin","drakonite origin","drakonite home","drakonites country","drakonites home",
+        "drakonites origin","drakonites location","drakonite location","drakonites from","where is drakonites from",
+        "wheres drakonites from","where is drakonite located","where is drakonite based","drakonite is from",
+        "drakonite is from which country","what is drakonites country","what is drakonite country",
+        "whats drakonites country","whats drakonite country","which country is drakonites from",
+        "where drakonite originated","what country did drakonite come from","drakonite comes from",
+        "where does drakonite come from","what country does drakonite come from","drakonite nationality",
+        "drakonite from which country","drakonite country name","drakonite real country","where is drakonite",
+        "drakonites nationality","drakonite origin country","origin of drakonite","where is drako from","where is drako","drakonite",
+        "who is drakonite","what is drakonite","drakonite info","tell me about drakonite","drakonite brainrot",
+        "drakonite sab","drakonites sab","drakonite real name","drakonites real name",
+    },a="ARGENTINA"},
+    {p={
+        "who is grow a garden ex owner","who is the grow a garden ex owner","whose the grow a garden ex owner",
+        "whos the grow a garden ex owner","who was grow a garden ex owner","who was the grow a garden ex owner",
+        "grow a garden ex owner","the grow a garden ex owner","grow a gardens ex owner","the grow a gardens ex owner",
+        "who is grow a gardens ex owner","who is the grow a gardens ex owner","who was grow a gardens ex owner",
+        "grow a garden ex owner name","name of grow a garden ex owner","name of the grow a garden ex owner",
+        "who is the ex owner of grow a garden","who was the ex owner of grow a garden","who is the ex owner of grow a gardens",
+        "who is grow a garden ex admin","who is the grow a garden ex admin","whose the grow a garden ex admin",
+        "whos the grow a garden ex admin","who was grow a garden ex admin","who was the grow a garden ex admin",
+        "grow a garden ex admin","the grow a garden ex admin","grow a gardens ex admin","the grow a gardens ex admin",
+        "who is grow a gardens ex admin","who is the grow a gardens ex admin","who was grow a gardens ex admin",
+        "grow a garden ex admin name","name of grow a garden ex admin","name of the grow a garden ex admin",
+        "who is the ex admin of grow a garden","who was the ex admin of grow a garden","who is the ex admin of grow a gardens",
+        "grow a garden ex owner admin","grow a garden ex admin owner","grow a garden former owner","grow a garden former admin",
+        "grow a garden old owner","grow a garden old admin","grow a garden previous owner","grow a garden previous admin",
+        "who was the owner of grow a garden","who was the admin of grow a garden","who used to own grow a garden",
+        "who used to be admin of grow a garden","who used to be the owner of grow a garden","who used to be the admin of grow a garden",
+        "former owner of grow a garden","former admin of grow a garden","former owner of the grow a garden","former admin of the grow a garden",
+        "old owner of grow a garden","old admin of grow a garden","previous owner of grow a garden","previous admin of grow a garden",
+        "the former owner of grow a garden","the former admin of grow a garden","the old owner of grow a garden","the old admin of grow a garden",
+        "the previous owner of grow a garden","the previous admin of grow a garden",
+        "who was the ex owner of the grow a garden","who was the ex admin of the grow a garden",
+        "who was the ex owner of grow a gardens","who was the ex admin of grow a gardens",
+        "grow a garden ex ownership","grow a garden ex staff","grow a garden former staff","grow a garden old staff",
+        "grow a garden former developer","grow a garden ex developer","grow a garden old developer",
+        "who was the ex developer of grow a garden","who is the ex developer of grow a garden",
+        "grow a garden ex","the grow a garden ex","grow a gardens ex","grow a garden ex name","grow a garden former name",
+        "grow a garden ex owner who","grow a garden ex admin who","ex owner grow a garden","ex admin grow a garden",
+        "ex owner of grow a garden","ex admin of grow a garden","ex owner of the grow a garden","ex admin of the grow a garden",
+    },a="JANDEL"},
     {p={"sammys favorite food","sammy favorite food","favorite food of sammy"},a="TACOS"},
     {p={"sammys net worth","net worth of sammy","how much is sammy worth","sammy net worth"},a="$30MILLION"},
     {p={"sammys company","company of sammy","what is sammys company"},a="DOBIGSTUDIOS"},
@@ -215,10 +608,374 @@ local BRAINROT_KNOWLEDGE = {
     {p={"john pork trait multiplier"},a="7.5X"},
     {p={"skibidi trait multiplier"},a="7X"},
     {p={"reindeer trait multiplier"},a="6X"},
+        {p={
+    -- ⭐ BEST SECRET → PHOENIX
+    "what is the best secret","whats the best secret",
+    "what is the best secret in sab","whats the best secret in sab",
+    "what is the best secret in steal a brainrot","whats the best secret in steal a brainrot",
+    "what is the best secret brainrot","whats the best secret brainrot",
+    "what is the best secret brainrot in sab","whats the best secret brainrot in sab",
+    "what is the best secret brainrot in steal a brainrot","whats the best secret brainrot in steal a brainrot",
+    "best secret","the best secret","best secret in sab","best secret in steal a brainrot",
+    "best secret brainrot","best secret brainrot in sab","best secret brainrot in steal a brainrot",
+    "the best secret in sab","the best secret in steal a brainrot",
+    "which secret is the best","which secret is best","which secret is best in sab","which secret is best in steal a brainrot",
+    "which is the best secret","which is the best secret in sab","which is the best secret in steal a brainrot",
+    "which is the best secret brainrot","which is the best secret brainrot in sab","which is the best secret brainrot in steal a brainrot",
+    "what secret is the best","what secret is best","what secret is best in sab","what secret is best in steal a brainrot",
+    "what is the strongest secret","whats the strongest secret",
+    "what is the strongest secret in sab","whats the strongest secret in sab",
+    "what is the strongest secret in steal a brainrot","whats the strongest secret in steal a brainrot",
+    "strongest secret","the strongest secret","strongest secret in sab","strongest secret in steal a brainrot",
+    "strongest secret brainrot","strongest secret brainrot in sab","strongest secret brainrot in steal a brainrot",
+    "what is the rarest secret","whats the rarest secret",
+    "what is the rarest secret in sab","whats the rarest secret in sab",
+    "what is the rarest secret in steal a brainrot","whats the rarest secret in steal a brainrot",
+    "rarest secret","the rarest secret","rarest secret in sab","rarest secret in steal a brainrot",
+    "rarest secret brainrot","rarest secret brainrot in sab","rarest secret brainrot in steal a brainrot",
+    "what is the most op secret","whats the most op secret",
+    "what is the most op secret in sab","whats the most op secret in sab",
+    "what is the most op secret in steal a brainrot","whats the most op secret in steal a brainrot",
+    "most op secret","the most op secret","most op secret in sab","most op secret in steal a brainrot",
+    "most op secret brainrot","most op secret brainrot in sab","most op secret brainrot in steal a brainrot",
+    "op secret","the op secret","op secret in sab","op secret in steal a brainrot",
+    "op secret brainrot","op secret brainrot in sab","op secret brainrot in steal a brainrot",
+    "what is the top secret","whats the top secret","top secret","the top secret",
+    "top secret brainrot","top secret brainrot in sab","top secret brainrot in steal a brainrot",
+    "top secret in sab","top secret in steal a brainrot",
+    "what is the number 1 secret","whats the number 1 secret","number 1 secret","the number 1 secret",
+    "number one secret","the number one secret",
+    "number 1 secret in sab","number 1 secret in steal a brainrot",
+    "number one secret in sab","number one secret in steal a brainrot",
+    "best secret of the game","best secret of sab","best secret of steal a brainrot",
+    "best secret in the game","best secret of all","best secret ever",
+    "what is the best secret of the game","whats the best secret of the game",
+    "what is the best secret of sab","whats the best secret of sab",
+    "what is the best secret of steal a brainrot","whats the best secret of steal a brainrot",
+    "which secret is the strongest","which secret is the rarest","which secret is the most op",
+    "which secret is the strongest in sab","which secret is the rarest in sab","which secret is the most op in sab",
+    "which secret is the strongest in steal a brainrot","which secret is the rarest in steal a brainrot","which secret is the most op in steal a brainrot",
+    "what secret should i get","what is the best secret to get","whats the best secret to get",
+    "best secret to get","best secret to get in sab","best secret to get in steal a brainrot",
+    "what is the best secret to have","whats the best secret to have",
+    "best secret to have","best secret to have in sab","best secret to have in steal a brainrot",
+    "what is the best secret in the game","whats the best secret in the game",
+    "tell me the best secret","tell me the best secret in sab","tell me the best secret in steal a brainrot",
+    "name the best secret","name the best secret in sab","name the best secret in steal a brainrot",
+    "give me the best secret","give me the best secret in sab","give me the best secret in steal a brainrot",
+    "whats the best secret brainrot","best secret brainrot sab","best secret sab",
+    },a="PHOENIX"},
+    {p={
+    -- ⭐ BEST BRAINROT IN DIVINE MACHINE → GRIFFIN
+    "what is the best brainrot in the divine machine","whats the best brainrot in the divine machine",
+    "what is the best brainrot in divine machine","whats the best brainrot in divine machine",
+    "what is the best brainrot from the divine machine","whats the best brainrot from the divine machine",
+    "what is the best brainrot from divine machine","whats the best brainrot from divine machine",
+    "best brainrot in the divine machine","best brainrot in divine machine",
+    "best brainrot from the divine machine","best brainrot from divine machine",
+    "best brainrot divine machine","divine machine best brainrot","divine machine best brain",
+    "divine machine brainrot","divine machine strongest brainrot","divine machine rarest brainrot",
+    "best brainrot divine fuse","best brainrot in divine fuse","best brainrot from divine fuse",
+    "best brainrot in the divine fuse","best brainrot from the divine fuse",
+    "what is the best brainrot in the divine fuse","whats the best brainrot in the divine fuse",
+    "what is the best brainrot from the divine fuse","whats the best brainrot from the divine fuse",
+    "what is the best brainrot in divine fuse","whats the best brainrot in divine fuse",
+    "what is the best brainrot from divine fuse","whats the best brainrot from divine fuse",
+    "divine fuse best brainrot","divine fuse best brain","best brainrot divine fuse machine",
+    "which brainrot is the best in the divine machine","which brainrot is best in the divine machine",
+    "which brainrot is the best in divine machine","which brainrot is best in divine machine",
+    "which brainrot is the best from the divine machine","which brainrot is best from the divine machine",
+    "which brainrot is the best from divine machine","which brainrot is best from divine machine",
+    "which brainrot is the best in the divine fuse","which brainrot is best in the divine fuse",
+    "which brainrot is the best in divine fuse","which brainrot is best in divine fuse",
+    "which is the best brainrot in the divine machine","which is the best brainrot in divine machine",
+    "which is the best divine machine brainrot","which is the best divine fuse brainrot",
+    "strongest brainrot in the divine machine","strongest brainrot in divine machine",
+    "strongest brainrot from the divine machine","strongest brainrot from divine machine",
+    "strongest brainrot in the divine fuse","strongest brainrot in divine fuse",
+    "strongest divine machine brainrot","strongest divine fuse brainrot",
+    "rarest brainrot in the divine machine","rarest brainrot in divine machine",
+    "rarest brainrot from the divine machine","rarest brainrot from divine machine",
+    "rarest brainrot in the divine fuse","rarest brainrot in divine fuse",
+    "rarest divine machine brainrot","rarest divine fuse brainrot",
+    "most op brainrot in the divine machine","most op brainrot in divine machine",
+    "most op brainrot from the divine machine","most op brainrot from divine machine",
+    "most op divine machine brainrot","most op divine fuse brainrot","op divine machine brainrot","op divine fuse brainrot",
+    "top brainrot in the divine machine","top brainrot from the divine machine",
+    "top brainrot in divine machine","top brainrot from divine machine",
+    "top divine machine brainrot","top divine fuse brainrot",
+    "number 1 brainrot in the divine machine","number 1 divine machine brainrot",
+    "number one brainrot in the divine machine","number one divine machine brainrot",
+    "what brainrot is best in the divine machine","what brainrot is best in divine machine",
+    "what brainrot is best from the divine machine","what brainrot is best from divine machine",
+    "what brainrot is best divine machine","what brainrot is best divine fuse",
+    "what brainrot do i get from the divine machine","what brainrot do you get from the divine machine",
+    "what brainrot do i get from divine machine","what brainrot do you get from divine machine",
+    "what brainrot do i get from the divine fuse","what brainrot do you get from the divine fuse",
+    "what brainrot comes from the divine machine","what brainrot comes from divine machine",
+    "what brainrot comes from the divine fuse","what brainrot comes from divine fuse",
+    "what comes from the divine machine","what comes from divine machine","what comes from the divine fuse",
+    "what can i get from the divine machine","what can you get from the divine machine",
+    "what can you get from divine machine","what can you get from the divine fuse",
+    "best brainrot you can get from the divine machine","best brainrot you can get from divine machine",
+    "best brainrot you can get from the divine fuse",
+    "best thing from the divine machine","best thing from divine machine","best thing from the divine fuse",
+    "best pet from the divine machine","best pet from divine machine","best pet from the divine fuse",
+    "what is the best thing from the divine machine","whats the best thing from the divine machine",
+    "what is the best pet from the divine machine","whats the best pet from the divine machine",
+    "best from divine machine","best from the divine machine","best from divine fuse","best from the divine fuse",
+    "best brainrot divine machine sab","divine machine brainrot sab","divine fuse brainrot sab",
+},a="GRIFFIN"},
+    -- ⭐ RAREST BRAINROT IN WITCH FUSE → HEADLESSHORSEMAN
+    {p={
+        "what is the rarest brainrot in the witch fuse","whats the rarest brainrot in the witch fuse",
+        "what is the rarest brainrot in witch fuse","whats the rarest brainrot in witch fuse",
+        "what is the rarest brainrot from the witch fuse","whats the rarest brainrot from the witch fuse",
+        "what is the rarest brainrot from witch fuse","whats the rarest brainrot from witch fuse",
+        "rarest brainrot in the witch fuse","rarest brainrot in witch fuse",
+        "rarest brainrot from the witch fuse","rarest brainrot from witch fuse",
+        "rarest brainrot witch fuse","witch fuse rarest brainrot","witch fuse rarest brain",
+        "witch fuse brainrot","witch fuse rarest","witch fuse strongest brainrot",
+        "best brainrot in the witch fuse","best brainrot in witch fuse","best brainrot from the witch fuse","best brainrot from witch fuse",
+        "what is the best brainrot in the witch fuse","whats the best brainrot in the witch fuse",
+        "what is the best brainrot from the witch fuse","whats the best brainrot from the witch fuse",
+        "which brainrot is the rarest in the witch fuse","which brainrot is rarest in the witch fuse",
+        "which brainrot is the rarest from the witch fuse","which brainrot is rarest from witch fuse",
+        "which is the rarest brainrot in the witch fuse","which is the rarest witch fuse brainrot",
+        "which brainrot is the best in the witch fuse","which brainrot is best in the witch fuse",
+        "strongest brainrot in the witch fuse","strongest brainrot in witch fuse","strongest brainrot from the witch fuse","strongest brainrot from witch fuse",
+        "strongest witch fuse brainrot","most op brainrot in the witch fuse","most op witch fuse brainrot",
+        "op witch fuse brainrot","top brainrot in the witch fuse","top brainrot from the witch fuse","top witch fuse brainrot",
+        "number 1 brainrot in the witch fuse","number one brainrot in the witch fuse","number 1 witch fuse brainrot",
+        "what brainrot is best in the witch fuse","what brainrot is best from the witch fuse",
+        "what brainrot do you get from the witch fuse","what brainrot comes from the witch fuse",
+        "what comes from the witch fuse","what can you get from the witch fuse",
+        "best thing from the witch fuse","best pet from the witch fuse","best from the witch fuse","best from witch fuse",
+        "tell me the rarest brainrot in the witch fuse","name the rarest brainrot in the witch fuse",
+        "give me the rarest brainrot in the witch fuse","rarest brainrot witch fuse sab",
+    },a="HEADLESSHORSEMAN"},
+    -- ⭐ RAREST BRAINROT IN SUMMER FUSE → DRAGONAQUANINI
+    {p={
+        "what is the rarest brainrot in the summer fuse","whats the rarest brainrot in the summer fuse",
+        "what is the rarest brainrot in summer fuse","whats the rarest brainrot in summer fuse",
+        "what is the rarest brainrot from the summer fuse","whats the rarest brainrot from the summer fuse",
+        "what is the rarest brainrot from summer fuse","whats the rarest brainrot from summer fuse",
+        "rarest brainrot in the summer fuse","rarest brainrot in summer fuse",
+        "rarest brainrot from the summer fuse","rarest brainrot from summer fuse",
+        "rarest brainrot summer fuse","summer fuse rarest brainrot","summer fuse rarest brain",
+        "summer fuse brainrot","summer fuse rarest","summer fuse strongest brainrot",
+        "best brainrot in the summer fuse","best brainrot in summer fuse","best brainrot from the summer fuse","best brainrot from summer fuse",
+        "what is the best brainrot in the summer fuse","whats the best brainrot in the summer fuse",
+        "what is the best brainrot from the summer fuse","whats the best brainrot from the summer fuse",
+        "which brainrot is the rarest in the summer fuse","which brainrot is rarest in the summer fuse",
+        "which brainrot is the rarest from the summer fuse","which brainrot is rarest from summer fuse",
+        "which is the rarest brainrot in the summer fuse","which is the rarest summer fuse brainrot",
+        "which brainrot is the best in the summer fuse","which brainrot is best in the summer fuse",
+        "strongest brainrot in the summer fuse","strongest brainrot in summer fuse","strongest brainrot from the summer fuse","strongest brainrot from summer fuse",
+        "strongest summer fuse brainrot","most op brainrot in the summer fuse","most op summer fuse brainrot",
+        "op summer fuse brainrot","top brainrot in the summer fuse","top brainrot from the summer fuse","top summer fuse brainrot",
+        "number 1 brainrot in the summer fuse","number one brainrot in the summer fuse","number 1 summer fuse brainrot",
+        "what brainrot is best in the summer fuse","what brainrot is best from the summer fuse",
+        "what brainrot do you get from the summer fuse","what brainrot comes from the summer fuse",
+        "what comes from the summer fuse","what can you get from the summer fuse",
+        "best thing from the summer fuse","best pet from the summer fuse","best from the summer fuse","best from summer fuse",
+        "tell me the rarest brainrot in the summer fuse","name the rarest brainrot in the summer fuse",
+        "give me the rarest brainrot in the summer fuse","rarest brainrot summer fuse sab",
+    },a="DRAGONAQUANINI"},
+    -- ⭐ RAREST BRAINROT IN FUSE MACHINE → HYDRADRAGONCANNELLONI
+    {p={
+        "what is the rarest brainrot in the fuse machine","whats the rarest brainrot in the fuse machine",
+        "what is the rarest brainrot in fuse machine","whats the rarest brainrot in fuse machine",
+        "what is the rarest brainrot from the fuse machine","whats the rarest brainrot from the fuse machine",
+        "what is the rarest brainrot from fuse machine","whats the rarest brainrot from fuse machine",
+        "rarest brainrot in the fuse machine","rarest brainrot in fuse machine",
+        "rarest brainrot from the fuse machine","rarest brainrot from fuse machine",
+        "rarest brainrot fuse machine","fuse machine rarest brainrot","fuse machine rarest brain",
+        "fuse machine rarest","fuse machine strongest brainrot","fuse machine best brainrot",
+        "which brainrot is the rarest in the fuse machine","which brainrot is rarest in the fuse machine",
+        "which brainrot is the rarest from the fuse machine","which brainrot is rarest from fuse machine",
+        "which is the rarest brainrot in the fuse machine","which is the rarest fuse machine brainrot",
+        "strongest brainrot in the fuse machine","strongest brainrot in fuse machine","strongest brainrot from the fuse machine","strongest brainrot from fuse machine",
+        "strongest fuse machine brainrot","most op brainrot in the fuse machine","most op fuse machine brainrot",
+        "op fuse machine brainrot","top brainrot in the fuse machine","top brainrot from the fuse machine","top fuse machine brainrot",
+        "number 1 brainrot in the fuse machine","number one brainrot in the fuse machine","number 1 fuse machine brainrot",
+        "what brainrot is best in the fuse machine","what brainrot is best from the fuse machine",
+        "what brainrot do you get from the fuse machine","what brainrot comes from the fuse machine",
+        "best thing from the fuse machine","best pet from the fuse machine","best from fuse machine","best from the fuse machine",
+        "tell me the rarest brainrot in the fuse machine","name the rarest brainrot in the fuse machine",
+        "give me the rarest brainrot in the fuse machine","rarest brainrot fuse machine sab",
+    },a="HYDRADRAGONCANNELLONI"},
+    -- ⭐ SECOND OG FUSE → HYDRADRAGONCANNELLONI
+    {p={
+        "what is the rarest brainrot of the second og fuse","whats the rarest brainrot of the second og fuse",
+        "what is the rarest brainrot in the second og fuse","whats the rarest brainrot in the second og fuse",
+        "what is the rarest brainrot from the second og fuse","whats the rarest brainrot from the second og fuse",
+        "rarest brainrot of the second og fuse","rarest brainrot in the second og fuse",
+        "rarest brainrot from the second og fuse","rarest brainrot second og fuse",
+        "second og fuse rarest brainrot","second og fuse rarest","second og fuse rarest brain",
+        "second og fuse brainrot","second og fuse best brainrot","second og fuse strongest brainrot",
+        "what is the best brainrot of the second og fuse","whats the best brainrot of the second og fuse",
+        "what is the best brainrot in the second og fuse","whats the best brainrot in the second og fuse",
+        "what is the best brainrot from the second og fuse","whats the best brainrot from the second og fuse",
+        "best brainrot of the second og fuse","best brainrot in the second og fuse",
+        "best brainrot from the second og fuse","best brainrot second og fuse",
+        "which brainrot is the rarest in the second og fuse","which brainrot is rarest in the second og fuse",
+        "which brainrot is the best in the second og fuse","which brainrot is best in the second og fuse",
+        "which is the rarest brainrot of the second og fuse","which is the best second og fuse brainrot",
+        "strongest brainrot of the second og fuse","strongest brainrot in the second og fuse",
+        "strongest brainrot from the second og fuse","strongest second og fuse brainrot",
+        "most op brainrot of the second og fuse","most op brainrot in the second og fuse",
+        "most op second og fuse brainrot","op second og fuse brainrot","top second og fuse brainrot",
+        "top brainrot of the second og fuse","top brainrot in the second og fuse","top brainrot from the second og fuse",
+        "number 1 brainrot of the second og fuse","number one brainrot of the second og fuse","number 1 second og fuse brainrot",
+        "what brainrot is best in the second og fuse","what brainrot is best from the second og fuse",
+        "what brainrot do you get from the second og fuse","what brainrot comes from the second og fuse",
+        "best thing from the second og fuse","best pet from the second og fuse","best from the second og fuse",
+        "tell me the rarest brainrot of the second og fuse","name the rarest brainrot of the second og fuse",
+        "give me the rarest brainrot of the second og fuse","rarest brainrot second og fuse sab",
+        "2nd og fuse","2nd og fuse brainrot","2nd og fuse rarest","second og fuse",
+    },a="HYDRADRAGONCANNELLONI"},
+    -- ⭐ RAREST BRAINROT IN HAUNTED FUSE → PHOENIX
+    {p={
+        "what is the rarest brainrot in the haunted fuse","whats the rarest brainrot in the haunted fuse",
+        "what is the rarest brainrot in haunted fuse","whats the rarest brainrot in haunted fuse",
+        "what is the rarest brainrot from the haunted fuse","whats the rarest brainrot from the haunted fuse",
+        "what is the rarest brainrot from haunted fuse","whats the rarest brainrot from haunted fuse",
+        "rarest brainrot in the haunted fuse","rarest brainrot in haunted fuse",
+        "rarest brainrot from the haunted fuse","rarest brainrot from haunted fuse",
+        "rarest brainrot haunted fuse","haunted fuse rarest brainrot","haunted fuse rarest brain",
+        "haunted fuse rarest","haunted fuse strongest brainrot","hauntedfuse rarest brainrot",
+        "which brainrot is the rarest in the haunted fuse","which brainrot is rarest in the haunted fuse",
+        "which brainrot is the rarest from the haunted fuse","which brainrot is rarest from haunted fuse",
+        "which is the rarest brainrot in the haunted fuse","which is the rarest haunted fuse brainrot",
+        "strongest brainrot in the haunted fuse","strongest brainrot in haunted fuse","strongest brainrot from the haunted fuse","strongest brainrot from haunted fuse",
+        "strongest haunted fuse brainrot","most op brainrot in the haunted fuse","most op haunted fuse brainrot",
+        "op haunted fuse brainrot","top brainrot in the haunted fuse","top brainrot from the haunted fuse","top haunted fuse brainrot",
+        "number 1 brainrot in the haunted fuse","number one brainrot in the haunted fuse","number 1 haunted fuse brainrot",
+        "what brainrot is best in the haunted fuse","what brainrot is best from the haunted fuse",
+        "what brainrot do you get from the haunted fuse","what brainrot comes from the haunted fuse",
+        "best thing from the haunted fuse","best pet from the haunted fuse","best from haunted fuse","best from the haunted fuse",
+        "tell me the rarest brainrot in the haunted fuse","name the rarest brainrot in the haunted fuse",
+        "give me the rarest brainrot in the haunted fuse","rarest brainrot haunted fuse sab",
+    },a="PHOENIX"},
+    -- ⭐ RAREST / BEST BRAINROT IN CRAFT MACHINE → LOSDRAGONS
+    {p={
+        "what is the rarest brainrot in the craft machine","whats the rarest brainrot in the craft machine",
+        "what is the rarest brainrot in craft machine","whats the rarest brainrot in craft machine",
+        "what is the rarest brainrot from the craft machine","whats the rarest brainrot from the craft machine",
+        "what is the rarest brainrot from craft machine","whats the rarest brainrot from craft machine",
+        "rarest brainrot in the craft machine","rarest brainrot in craft machine",
+        "rarest brainrot from the craft machine","rarest brainrot from craft machine",
+        "rarest brainrot craft machine","craft machine rarest brainrot","craft machine rarest brain",
+        "craft machine rarest","craft machine strongest brainrot",
+        "what is the best brainrot in the craft machine","whats the best brainrot in the craft machine",
+        "what is the best brainrot in craft machine","whats the best brainrot in craft machine",
+        "what is the best brainrot from the craft machine","whats the best brainrot from the craft machine",
+        "what is the best brainrot from craft machine","whats the best brainrot from craft machine",
+        "best brainrot in the craft machine","best brainrot in craft machine",
+        "best brainrot from the craft machine","best brainrot from craft machine",
+        "best brainrot craft machine","craftmachine best brainrot","craftmachine rarest brainrot",
+        "which brainrot is the rarest in the craft machine","which brainrot is rarest in the craft machine",
+        "which brainrot is the best in the craft machine","which brainrot is best in the craft machine",
+        "which is the rarest brainrot in the craft machine","which is the best craft machine brainrot","which is the rarest craft machine brainrot",
+        "strongest brainrot in the craft machine","strongest brainrot in craft machine","strongest brainrot from the craft machine","strongest brainrot from craft machine",
+        "strongest craft machine brainrot","most op brainrot in the craft machine","most op craft machine brainrot",
+        "op craft machine brainrot","top brainrot in the craft machine","top brainrot from the craft machine","top craft machine brainrot",
+        "number 1 brainrot in the craft machine","number one brainrot in the craft machine","number 1 craft machine brainrot",
+        "what brainrot is best in the craft machine","what brainrot is best from the craft machine",
+        "what brainrot do you get from the craft machine","what brainrot comes from the craft machine",
+        "best thing from the craft machine","best pet from the craft machine","best from craft machine","best from the craft machine",
+        "tell me the rarest brainrot in the craft machine","name the rarest brainrot in the craft machine",
+        "tell me the best brainrot in the craft machine","name the best brainrot in the craft machine",
+        "give me the rarest brainrot in the craft machine","give me the best brainrot in the craft machine",
+        "rarest brainrot craft machine sab","best brainrot craft machine sab",
+    },a="LOSDRAGONS"},
+    -- ⭐ RAREST BRAINROT IN CYBER CRAFT → DIGINARWHAL
+    {p={
+        "what is the rarest brainrot in the cyber craft","whats the rarest brainrot in the cyber craft",
+        "what is the rarest brainrot in cyber craft","whats the rarest brainrot in cyber craft",
+        "what is the rarest brainrot from the cyber craft","whats the rarest brainrot from the cyber craft",
+        "what is the rarest brainrot from cyber craft","whats the rarest brainrot from cyber craft",
+        "rarest brainrot in the cyber craft","rarest brainrot in cyber craft",
+        "rarest brainrot from the cyber craft","rarest brainrot from cyber craft",
+        "rarest brainrot cyber craft","cyber craft rarest brainrot","cyber craft rarest brain",
+        "cyber craft rarest","cyber craft strongest brainrot","cybercraft rarest brainrot","cybercraft brainrot",
+        "the rarest brainrot in the cybercraft","the rarest brainrot in cybercraft",
+        "the rarest brainrot from the cybercraft","the rarest brainrot from cybercraft",
+        "the best brainrot in the cybercraft","the best brainrot in cybercraft",
+        "the best brainrot from the cybercraft","the best brainrot from cybercraft",
+        "what is the rarest brainrot in the cybercraft","whats the rarest brainrot in the cybercraft",
+        "what is the rarest brainrot in cybercraft","whats the rarest brainrot in cybercraft",
+        "what is the rarest brainrot from the cybercraft","whats the rarest brainrot from the cybercraft",
+        "what is the rarest brainrot from cybercraft","whats the rarest brainrot from cybercraft",
+        "rarest brainrot in the cybercraft","rarest brainrot in cybercraft",
+        "rarest brainrot from the cybercraft","rarest brainrot from cybercraft",
+        "rarest brainrot cybercraft","cybercraft rarest brainrot","cybercraft rarest","cybercraft rarest brain",
+        "cybercraft strongest brainrot","cybercraft brainrot","cybercraft best brainrot",
+        "what is the best brainrot in the cybercraft","whats the best brainrot in the cybercraft",
+        "what is the best brainrot in cybercraft","whats the best brainrot in cybercraft",
+        "what is the best brainrot from the cybercraft","whats the best brainrot from the cybercraft",
+        "best brainrot in the cybercraft","best brainrot in cybercraft","best brainrot from the cybercraft","best brainrot from cybercraft",
+        "best brainrot cybercraft","best cybercraft brainrot",
+        "which brainrot is the rarest in the cybercraft","which brainrot is rarest in the cybercraft",
+        "which brainrot is the best in the cybercraft","which brainrot is best in the cybercraft",
+        "which is the rarest brainrot in the cybercraft","which is the rarest cybercraft brainrot",
+        "strongest brainrot in the cybercraft","strongest brainrot in cybercraft","strongest brainrot from the cybercraft","strongest brainrot from cybercraft",
+        "strongest cybercraft brainrot","most op brainrot in the cybercraft","most op cybercraft brainrot",
+        "op cybercraft brainrot","top brainrot in the cybercraft","top brainrot from the cybercraft","top cybercraft brainrot",
+        "number 1 brainrot in the cybercraft","number one brainrot in the cybercraft","number 1 cybercraft brainrot",
+        "what brainrot is best in the cybercraft","what brainrot is best from the cybercraft",
+        "what brainrot do you get from the cybercraft","what brainrot comes from the cybercraft",
+        "best thing from the cybercraft","best pet from the cybercraft","best from cybercraft","best from the cybercraft",
+        "tell me the rarest brainrot in the cybercraft","name the rarest brainrot in the cybercraft",
+        "give me the rarest brainrot in the cybercraft","rarest brainrot cybercraft sab",
+        "what is the best brainrot in the cyber craft","whats the best brainrot in the cyber craft",
+        "what is the best brainrot from the cyber craft","whats the best brainrot from the cyber craft",
+        "best brainrot in the cyber craft","best brainrot in cyber craft","best brainrot from the cyber craft","best brainrot from cyber craft",
+        "best brainrot cyber craft","best brainrot cybercraft",
+        "which brainrot is the rarest in the cyber craft","which brainrot is rarest in the cyber craft",
+        "which brainrot is the best in the cyber craft","which brainrot is best in the cyber craft",
+        "which is the rarest brainrot in the cyber craft","which is the rarest cyber craft brainrot",
+        "strongest brainrot in the cyber craft","strongest brainrot in cyber craft","strongest brainrot from the cyber craft","strongest brainrot from cyber craft",
+        "strongest cyber craft brainrot","most op brainrot in the cyber craft","most op cyber craft brainrot",
+        "op cyber craft brainrot","top brainrot in the cyber craft","top brainrot from the cyber craft","top cyber craft brainrot",
+        "number 1 brainrot in the cyber craft","number one brainrot in the cyber craft","number 1 cyber craft brainrot",
+        "what brainrot is best in the cyber craft","what brainrot is best from the cyber craft",
+        "what brainrot do you get from the cyber craft","what brainrot comes from the cyber craft",
+        "best thing from the cyber craft","best pet from the cyber craft","best from cyber craft","best from the cyber craft",
+        "tell me the rarest brainrot in the cyber craft","name the rarest brainrot in the cyber craft",
+        "give me the rarest brainrot in the cyber craft","rarest brainrot cyber craft sab",
+    },a="DIGINARWHAL"},
+    -- ⭐ RAREST BRAINROT IN RNG MACHINE → LABREAKFASTCOMBINASION
+    {p={
+        "what is the rarest brainrot in the rng machine","whats the rarest brainrot in the rng machine",
+        "what is the rarest brainrot in rng machine","whats the rarest brainrot in rng machine",
+        "what is the rarest brainrot from the rng machine","whats the rarest brainrot from the rng machine",
+        "what is the rarest brainrot from rng machine","whats the rarest brainrot from rng machine",
+        "rarest brainrot in the rng machine","rarest brainrot in rng machine",
+        "rarest brainrot from the rng machine","rarest brainrot from rng machine",
+        "rarest brainrot rng machine","rng machine rarest brainrot","rng machine rarest brain",
+        "rng machine rarest","rng machine strongest brainrot","rng machine brainrot",
+        "what is the best brainrot in the rng machine","whats the best brainrot in the rng machine",
+        "what is the best brainrot from the rng machine","whats the best brainrot from the rng machine",
+        "best brainrot in the rng machine","best brainrot in rng machine","best brainrot from the rng machine","best brainrot from rng machine",
+        "best brainrot rng machine","best rng machine brainrot",
+        "which brainrot is the rarest in the rng machine","which brainrot is rarest in the rng machine",
+        "which brainrot is the best in the rng machine","which brainrot is best in the rng machine",
+        "which is the rarest brainrot in the rng machine","which is the rarest rng machine brainrot",
+        "strongest brainrot in the rng machine","strongest brainrot in rng machine","strongest brainrot from the rng machine","strongest brainrot from rng machine",
+        "strongest rng machine brainrot","most op brainrot in the rng machine","most op rng machine brainrot",
+        "op rng machine brainrot","top brainrot in the rng machine","top brainrot from the rng machine","top rng machine brainrot",
+        "number 1 brainrot in the rng machine","number one brainrot in the rng machine","number 1 rng machine brainrot",
+        "what brainrot is best in the rng machine","what brainrot is best from the rng machine",
+        "what brainrot do you get from the rng machine","what brainrot comes from the rng machine",
+        "best thing from the rng machine","best pet from the rng machine","best from rng machine","best from the rng machine",
+        "tell me the rarest brainrot in the rng machine","name the rarest brainrot in the rng machine",
+        "give me the rarest brainrot in the rng machine","rarest brainrot rng machine sab",
+    },a="LABREAKFASTCOMBINASION"},
     {p={
     -- original patterns (answer ab PHOENIX)
     "best fuse machine","best fuse brainrot","best brainrot in fuse machine","best brainrot from fuse machine","strongest fuse brainrot","rarest fuse brainrot","best fusion","best fusion brainrot","op fuse brainrot",
-    -- what/which question forms
     "what is the best fuse machine brainrot","whats the best fuse machine brainrot","what is the best fuse machine brainrot in sab","whats the best fuse machine brainrot in sab",
     "what is the best brainrot in the fuse machine","whats the best brainrot in the fuse machine","what is the best brainrot from the fuse machine","whats the best brainrot from the fuse machine",
     "what is the best brainrot in fuse machine","whats the best brainrot in fuse machine","what is the best brainrot from fuse machine","whats the best brainrot from fuse machine",
@@ -226,7 +983,6 @@ local BRAINROT_KNOWLEDGE = {
     "which brainrot is the best in the fuse machine","which brainrot is the best in fuse machine","which brainrot is the best from the fuse machine","which brainrot is the best from fuse machine",
     "which brainrot is best in the fuse machine","which brainrot is best in fuse machine","which brainrot is best from the fuse machine","which brainrot is best from fuse machine",
     "which is the best fuse machine brainrot","which is the best brainrot in the fuse machine","which is the best brainrot from the fuse machine",
-    -- strongest / rarest / op forms
     "strongest brainrot in the fuse machine","strongest brainrot in fuse machine","strongest brainrot from the fuse machine","strongest brainrot from fuse machine",
     "strongest brainrot in the fusion machine","strongest brainrot from the fusion machine","strongest brainrot fusion machine",
     "rarest brainrot in the fuse machine","rarest brainrot in fuse machine","rarest brainrot from the fuse machine","rarest brainrot from fuse machine",
@@ -237,11 +993,9 @@ local BRAINROT_KNOWLEDGE = {
     "most op brainrot in the fuse machine","most op brainrot in fuse machine","most op brainrot from the fuse machine","most op brainrot from fuse machine",
     "most op fuse machine brainrot","most op fusion brainrot","most op brainrot from fusion",
     "op brainrot in the fuse machine","op brainrot in fuse machine","op brainrot from the fuse machine","op brainrot from fuse machine","op brainrot fusion machine",
-    -- "from the fuse machine" reorders
     "best brainrot you can get from the fuse machine","best brainrot you can get from fuse machine","best brainrot you can get from the fusion machine",
     "best thing to get from the fuse machine","best thing from the fuse machine","best thing from fuse machine","best thing from the fusion machine",
     "best pet from the fuse machine","best pet from fuse machine","best pet from the fusion machine",
-    -- short / casual
     "best fuse brainrot sab","best fuse machine brainrot sab","best fusion brainrot sab","best fusion brainrot in sab",
     "best brainrot fuse","best brainrot fusion","best fuse brain","best fusion brain","best fuse brainrot","best fusion brainrot",
     "best machine brainrot","best machine fusion brainrot","best machine fusion",
@@ -250,7 +1004,6 @@ local BRAINROT_KNOWLEDGE = {
     "top brainrot fusion","top brainrot from fusion","top brainrot in fusion",
     "number 1 fuse brainrot","number 1 fusion brainrot","number one fuse brainrot","number one fusion brainrot",
     "1 fuse brainrot","1 fusion brainrot",
-    -- what brainrot / what does / what do
     "what brainrot is best in the fuse machine","what brainrot is best in fuse machine","what brainrot is best from the fuse machine","what brainrot is best from fuse machine",
     "what brainrot is best in the fusion machine","what brainrot is best from the fusion machine","what brainrot is best fusion",
     "what brainrot do i get from the fuse machine","what brainrot do you get from the fuse machine","what brainrot do you get from fuse machine",
@@ -258,151 +1011,66 @@ local BRAINROT_KNOWLEDGE = {
     "what brainrot comes from the fuse machine","what brainrot comes from fuse machine","what brainrot comes from the fusion machine",
     "what comes from the fuse machine","what comes from fuse machine","what comes from the fusion machine",
     "what can i get from the fuse machine","what can you get from the fuse machine","what can you get from fuse machine","what can you get from the fusion machine",
-    -- short direct
     "best from fuse machine","best from the fuse machine","best from fusion machine","best from the fusion machine",
     "strongest from fuse machine","strongest from the fuse machine","rarest from fuse machine","rarest from the fuse machine",
 },a="PHOENIX"},
-    -- ⭐ SERIES 2 MINIFIGURES — most OP minifigure toy = GRIFFIN
     {p={
-        -- exact full phrasings
-        "what is the most op minifigure toy in the new series 2 minifigures",
-        "whats the most op minifigure toy in the new series 2 minifigures",
-        "what is the most op minifigure toy in series 2 minifigures",
-        "whats the most op minifigure toy in series 2 minifigures",
-        "what is the most op minifigure toy in the series 2 minifigures",
-        "whats the most op minifigure toy in the series 2 minifigures",
-        "what is the most op minifigure toy of the new series 2 minifigures",
-        "whats the most op minifigure toy of the new series 2 minifigures",
-        "what is the most op minifigure toy of series 2 minifigures",
-        "whats the most op minifigure toy of series 2 minifigures",
-        -- minifigure (no "toy")
-        "what is the most op minifigure in the new series 2 minifigures",
-        "whats the most op minifigure in the new series 2 minifigures",
-        "what is the most op minifigure in series 2 minifigures",
-        "whats the most op minifigure in series 2 minifigures",
-        "what is the most op minifigure in the series 2 minifigures",
-        "whats the most op minifigure in the series 2 minifigures",
-        -- which question forms
-        "which minifigure toy is the most op in the new series 2 minifigures",
-        "which minifigure toy is the most op in series 2 minifigures",
-        "which minifigure toy is the most op in the series 2 minifigures",
-        "which minifigure toy is most op in the new series 2 minifigures",
-        "which minifigure toy is most op in series 2 minifigures",
-        "which minifigure is the most op in the new series 2 minifigures",
-        "which minifigure is the most op in series 2 minifigures",
-        "which minifigure is the most op in the series 2 minifigures",
-        "which minifigure is most op in the new series 2 minifigures",
-        "which minifigure is most op in series 2 minifigures",
-        -- what question forms
-        "what minifigure toy is the most op in the new series 2 minifigures",
-        "what minifigure toy is the most op in series 2 minifigures",
-        "what minifigure toy is most op in the new series 2 minifigures",
-        "what minifigure toy is most op in series 2 minifigures",
-        "what minifigure is the most op in the new series 2 minifigures",
-        "what minifigure is the most op in series 2 minifigures",
-        "what minifigure is most op in the new series 2 minifigures",
-        "what minifigure is most op in series 2 minifigures",
-        -- short — "most op ... series 2 minifigures"
-        "most op minifigure toy in the new series 2 minifigures",
-        "most op minifigure toy in series 2 minifigures",
-        "most op minifigure toy new series 2 minifigures",
-        "most op minifigure toy series 2 minifigures",
-        "most op minifigure in the new series 2 minifigures",
-        "most op minifigure in series 2 minifigures",
-        "most op minifigure new series 2 minifigures",
-        "most op minifigure series 2 minifigures",
-        -- reversed order
-        "series 2 minifigures most op minifigure toy",
-        "series 2 minifigures most op minifigure",
-        "new series 2 minifigures most op minifigure toy",
-        "new series 2 minifigures most op minifigure",
-        -- short — "series 2" only
-        "what is the most op minifigure toy in the new series 2",
-        "whats the most op minifigure toy in the new series 2",
-        "what is the most op minifigure toy in series 2",
-        "whats the most op minifigure toy in series 2",
-        "what is the most op minifigure in the new series 2",
-        "whats the most op minifigure in the new series 2",
-        "what is the most op minifigure in series 2",
-        "whats the most op minifigure in series 2",
-        "which minifigure toy is the most op in series 2",
-        "which minifigure toy is most op in series 2",
-        "which minifigure is the most op in series 2",
-        "which minifigure is most op in series 2",
-        "what minifigure toy is the most op in series 2",
-        "what minifigure is the most op in series 2",
-        "most op minifigure toy in the new series 2",
-        "most op minifigure toy in series 2",
-        "most op minifigure toy new series 2",
-        "most op minifigure toy series 2",
-        "most op minifigure in the new series 2",
-        "most op minifigure in series 2",
-        "most op minifigure new series 2",
-        "most op minifigure series 2",
-        "series 2 most op minifigure toy",
-        "series 2 most op minifigure",
-        "new series 2 most op minifigure toy",
-        "new series 2 most op minifigure",
-        -- best / strongest / rarest phrasings
-        "best minifigure toy in the new series 2 minifigures",
-        "best minifigure toy in series 2 minifigures",
-        "best minifigure toy series 2 minifigures",
-        "best minifigure toy in the new series 2",
-        "best minifigure toy in series 2",
-        "best minifigure toy series 2",
-        "best minifigure in the new series 2 minifigures",
-        "best minifigure in series 2 minifigures",
-        "best minifigure series 2 minifigures",
-        "best minifigure in the new series 2",
-        "best minifigure in series 2",
-        "best minifigure series 2",
-        "strongest minifigure toy in the new series 2 minifigures",
-        "strongest minifigure toy in series 2 minifigures",
-        "strongest minifigure toy series 2 minifigures",
-        "strongest minifigure toy in the new series 2",
-        "strongest minifigure toy in series 2",
-        "strongest minifigure toy series 2",
-        "strongest minifigure in the new series 2 minifigures",
-        "strongest minifigure in series 2 minifigures",
-        "strongest minifigure series 2 minifigures",
-        "strongest minifigure in the new series 2",
-        "strongest minifigure in series 2",
-        "strongest minifigure series 2",
-        "rarest minifigure toy in the new series 2 minifigures",
-        "rarest minifigure toy in series 2 minifigures",
-        "rarest minifigure toy series 2 minifigures",
-        "rarest minifigure toy in the new series 2",
-        "rarest minifigure toy in series 2",
-        "rarest minifigure toy series 2",
-        "rarest minifigure in the new series 2 minifigures",
-        "rarest minifigure in series 2 minifigures",
-        "rarest minifigure series 2 minifigures",
-        "rarest minifigure in the new series 2",
-        "rarest minifigure in series 2",
-        "rarest minifigure series 2",
-        -- "toy" only (drop minifigure word)
-        "most op toy in the new series 2 minifigures",
-        "most op toy in series 2 minifigures",
-        "most op toy series 2 minifigures",
-        "most op toy in the new series 2",
-        "most op toy in series 2",
-        "most op toy series 2",
-        -- "op ... " no "most"
-        "op minifigure toy in the new series 2 minifigures",
-        "op minifigure toy in series 2 minifigures",
-        "op minifigure toy series 2 minifigures",
-        "op minifigure toy in the new series 2",
-        "op minifigure toy in series 2",
-        "op minifigure toy series 2",
-        "op minifigure in the new series 2 minifigures",
-        "op minifigure in series 2 minifigures",
-        "op minifigure series 2 minifigures",
-        "op minifigure in the new series 2",
-        "op minifigure in series 2",
-        "op minifigure series 2",
+        "what is the most op minifigure toy in the new series 2 minifigures","whats the most op minifigure toy in the new series 2 minifigures",
+        "what is the most op minifigure toy in series 2 minifigures","whats the most op minifigure toy in series 2 minifigures",
+        "what is the most op minifigure toy in the series 2 minifigures","whats the most op minifigure toy in the series 2 minifigures",
+        "what is the most op minifigure toy of the new series 2 minifigures","whats the most op minifigure toy of the new series 2 minifigures",
+        "what is the most op minifigure toy of series 2 minifigures","whats the most op minifigure toy of series 2 minifigures",
+        "what is the most op minifigure in the new series 2 minifigures","whats the most op minifigure in the new series 2 minifigures",
+        "what is the most op minifigure in series 2 minifigures","whats the most op minifigure in series 2 minifigures",
+        "what is the most op minifigure in the series 2 minifigures","whats the most op minifigure in the series 2 minifigures",
+        "which minifigure toy is the most op in the new series 2 minifigures","which minifigure toy is the most op in series 2 minifigures",
+        "which minifigure toy is the most op in the series 2 minifigures","which minifigure toy is most op in the new series 2 minifigures",
+        "which minifigure toy is most op in series 2 minifigures","which minifigure is the most op in the new series 2 minifigures",
+        "which minifigure is the most op in series 2 minifigures","which minifigure is the most op in the series 2 minifigures",
+        "which minifigure is most op in the new series 2 minifigures","which minifigure is most op in series 2 minifigures",
+        "what minifigure toy is the most op in the new series 2 minifigures","what minifigure toy is the most op in series 2 minifigures",
+        "what minifigure toy is most op in the new series 2 minifigures","what minifigure toy is most op in series 2 minifigures",
+        "what minifigure is the most op in the new series 2 minifigures","what minifigure is the most op in series 2 minifigures",
+        "what minifigure is most op in the new series 2 minifigures","what minifigure is most op in series 2 minifigures",
+        "most op minifigure toy in the new series 2 minifigures","most op minifigure toy in series 2 minifigures",
+        "most op minifigure toy new series 2 minifigures","most op minifigure toy series 2 minifigures",
+        "most op minifigure in the new series 2 minifigures","most op minifigure in series 2 minifigures",
+        "most op minifigure new series 2 minifigures","most op minifigure series 2 minifigures",
+        "series 2 minifigures most op minifigure toy","series 2 minifigures most op minifigure",
+        "new series 2 minifigures most op minifigure toy","new series 2 minifigures most op minifigure",
+        "what is the most op minifigure toy in the new series 2","whats the most op minifigure toy in the new series 2",
+        "what is the most op minifigure toy in series 2","whats the most op minifigure toy in series 2",
+        "what is the most op minifigure in the new series 2","whats the most op minifigure in the new series 2",
+        "what is the most op minifigure in series 2","whats the most op minifigure in series 2",
+        "which minifigure toy is the most op in series 2","which minifigure toy is most op in series 2",
+        "which minifigure is the most op in series 2","which minifigure is most op in series 2",
+        "what minifigure toy is the most op in series 2","what minifigure is the most op in series 2",
+        "most op minifigure toy in the new series 2","most op minifigure toy in series 2",
+        "most op minifigure toy new series 2","most op minifigure toy series 2",
+        "most op minifigure in the new series 2","most op minifigure in series 2",
+        "most op minifigure new series 2","most op minifigure series 2",
+        "series 2 most op minifigure toy","series 2 most op minifigure",
+        "new series 2 most op minifigure toy","new series 2 most op minifigure",
+        "best minifigure toy in the new series 2 minifigures","best minifigure toy in series 2 minifigures","best minifigure toy series 2 minifigures",
+        "best minifigure toy in the new series 2","best minifigure toy in series 2","best minifigure toy series 2",
+        "best minifigure in the new series 2 minifigures","best minifigure in series 2 minifigures","best minifigure series 2 minifigures",
+        "best minifigure in the new series 2","best minifigure in series 2","best minifigure series 2",
+        "strongest minifigure toy in the new series 2 minifigures","strongest minifigure toy in series 2 minifigures","strongest minifigure toy series 2 minifigures",
+        "strongest minifigure toy in the new series 2","strongest minifigure toy in series 2","strongest minifigure toy series 2",
+        "strongest minifigure in the new series 2 minifigures","strongest minifigure in series 2 minifigures","strongest minifigure series 2 minifigures",
+        "strongest minifigure in the new series 2","strongest minifigure in series 2","strongest minifigure series 2",
+        "rarest minifigure toy in the new series 2 minifigures","rarest minifigure toy in series 2 minifigures","rarest minifigure toy series 2 minifigures",
+        "rarest minifigure toy in the new series 2","rarest minifigure toy in series 2","rarest minifigure toy series 2",
+        "rarest minifigure in the new series 2 minifigures","rarest minifigure in series 2 minifigures","rarest minifigure series 2 minifigures",
+        "rarest minifigure in the new series 2","rarest minifigure in series 2","rarest minifigure series 2",
+        "most op toy in the new series 2 minifigures","most op toy in series 2 minifigures","most op toy series 2 minifigures",
+        "most op toy in the new series 2","most op toy in series 2","most op toy series 2",
+        "op minifigure toy in the new series 2 minifigures","op minifigure toy in series 2 minifigures","op minifigure toy series 2 minifigures",
+        "op minifigure toy in the new series 2","op minifigure toy in series 2","op minifigure toy series 2",
+        "op minifigure in the new series 2 minifigures","op minifigure in series 2 minifigures","op minifigure series 2 minifigures",
+        "op minifigure in the new series 2","op minifigure in series 2","op minifigure series 2",
     },a="GRIFFIN"},
     {p={
-    -- ⭐ HAUNTED FUSE — best brainrot
     "haunted fuse best brainrot","haunted fuse best brain","haunted fuse brainrot","haunted fuse machine best brainrot","hauntedfuse best brainrot","hauntedfuse brainrot",
     "what is the best brainrot in the haunted fuse","whats the best brainrot in the haunted fuse","what is the best brainrot from the haunted fuse","whats the best brainrot from the haunted fuse",
     "what is the best brainrot in haunted fuse","whats the best brainrot in haunted fuse","what is the best brainrot from haunted fuse","whats the best brainrot from haunted fuse",
@@ -422,36 +1090,28 @@ local BRAINROT_KNOWLEDGE = {
 {p={"best craft machine brainrot","best craftmachine brainrot","best brainrot in craft machine","best brainrot from craft machine","strongest craft brainrot","rarest craft brainrot","best brainrot craft","best brainrot from craft"},a="LOSDRAGONS"},
     {p={"last rebirth","the last rebirth","last rebirth we added","most recent rebirth","newest rebirth","latest rebirth","final rebirth","highest rebirth","max rebirth","maximum rebirth","last rebirth level","top rebirth"},a="19"},
     {p={
-        -- existing
         "sab release date","sab released date","sab date","release date of sab","steal a brainrot release date","when was steal a brainrot released","when did sab release","when did sab come out","sab came out",
-        -- ⭐ "maded" spellings
         "when was sab maded","when sab maded","when sab was maded","when did sab maded","when did sab get maded",
         "when was sab made","when sab made","when sab was made","when did sab made","when did sab get made",
         "sab maded date","sab maded when","sab made date","sab made when","sab was maded when","sab was made when",
         "what date was sab maded","what date sab maded","what date was sab made","what date sab made",
         "sab maded on","sab made on","what date did sab maded","what date did sab made","what date did sab get maded",
-        -- creation forms
         "when was sab created","when sab created","sab created date","sab creation date",
         "when did sab get created","when was sab first made","when was sab first maded","when was sab first created",
         "what was the date sab was made","what was the date sab was maded","what was the date sab was created",
-        -- release reorders
         "when sab released","when sab was released","when was sab released date","sab released when",
-        -- short
         "sab maded day date","sab release","sab released","sab launch date","sab launch","when sab launch","when sab launched",
         "sab came out when","when sab came out","what date did sab come out","what date sab come out",
         "what date sab released","what date sab was released","what date sab was maded","what date sab was made",
     },a="MAY162025"},
     {p={
         "sab release month","sab month released","sab month","month sab was made","release month of sab","what month was sab released",
-        -- maded spellings
         "what month sab maded","what month was sab maded","what month sab made","what month was sab made",
         "which month sab maded","which month was sab maded","which month sab made","which month was sab made",
         "sab maded month","sab made month","sab month made","sab month maded","month sab maded","month sab made",
         "month sab was maded","month sab was made","when sab maded month","what month did sab maded","what month did sab made",
-        -- creation
         "sab creation month","what month was sab created","which month was sab created","month sab was created",
         "what month sab created","when was sab created month","what month was sab first made","what month was sab first maded",
-        -- release reframed
         "sab month of release","what month did sab release","what month sab released","what month did sab come out",
         "what month sab come out","which month did sab release","which month did sab come out","which month sab come out",
         "sab release month number","what month sab launched","which month sab launched","sab launch month",
@@ -459,96 +1119,69 @@ local BRAINROT_KNOWLEDGE = {
     },a="MAY"},
     {p={
         "sab release year","sab year released","sab year","year of release","year sab was released","what year was sab released",
-        -- maded spellings
         "what year sab maded","what year was sab maded","what year sab made","what year was sab made",
         "which year sab maded","which year was sab maded","which year sab made","which year was sab made",
         "sab maded year","sab made year","sab year made","sab year maded","year sab maded","year sab made",
         "year sab was maded","year sab was made","when sab maded year","when was sab maded year",
         "what year did sab maded","what year did sab made","what year did sab get maded","what year did sab get made",
-        -- creation
         "sab creation year","what year was sab created","which year was sab created","year sab was created",
         "what year sab created","when was sab created year","when sab created year",
         "what year was sab first made","what year was sab first maded",
-        -- release reframed
         "sab year of release","what year did sab release","what year sab released","what year did sab come out",
         "what year sab come out","which year did sab release","which year did sab come out","which year sab come out",
         "sab release year number","what year sab launched","which year sab launched","sab launch year",
         "what year sab was released","what year sab was maded","what year sab was made",
     },a="2025"},
-    {p={"sab release day","day sab was released","sab released day","day of release","what day was sab released","what day was sab made"},a="FRIDAY"},
+    {p={"sab release day","day sab was released","sab released day","day of release","what day was sab released","what day was sab made"},a="15"},
     {p={
-        -- ⭐ "maded" → day number 16
         "what day sab maded","what day was sab maded","what day number sab maded","what day number was sab maded",
         "which day sab maded","which day was sab maded","which day number sab maded","which day number was sab maded",
         "sab maded day","sab maded day number","day sab maded","day number sab maded",
         "when sab maded day","when was sab maded day","when sab maded day number","what day did sab maded","what day did sab made",
-        -- created
         "what day was sab created","which day was sab created","what day sab created",
         "sab created day","sab creation day","day sab was created","what day number was sab created",
-        -- release day number
         "what day number was sab released","what day number sab released","sab release day number","day number of sab release",
         "what day number was sab made","what day number sab made","sab made day number",
         "what day sab was released","what day sab was maded","what day sab was made",
     },a="16"},
-    -- ⭐ SAB MADE — DATE (day number 20)
     {p={
-        -- "does sab made" forms
         "what date does sab made","what date does sab maded","what date sab made","what date sab maded",
         "what date did sab made","what date did sab maded","what date was sab made","what date was sab maded",
-        -- reordered
         "sab made what date","sab maded what date","sab made date number","sab maded date number",
         "date number sab made","date number sab maded","sab date number","sab release date number",
-        -- whats/what is
         "what is sab made date","whats sab made date","what is sab maded date","whats sab maded date",
         "what is the sab made date","whats the sab made date","what is the sab maded date","whats the sab maded date",
         "what is the date of sab made","what is the date of sab maded","whats the date of sab made","whats the date of sab maded",
-        -- which
         "which date sab made","which date sab maded","which date was sab made","which date was sab maded",
         "which date did sab made","which date did sab maded",
-        -- on what date
         "on what date did sab made","on what date was sab made","on what date did sab maded","on what date was sab maded",
-        -- in sab
         "what date did sab made in sab","what date was sab made in sab","what date did sab get made","what date did sab get maded",
-        -- made on date
         "sab made on date","sab maded on date","sab was made on date","sab was maded on date",
-        -- date when
         "when date sab made","when date sab maded","date when sab made","date when sab maded",
         "date of sab made","date of sab maded","date of when sab was made","date of when sab was maded",
         "sab date of made","sab date of maded","the date sab made","the date sab maded",
-        -- give/tell me
         "give me the date sab made","give me the date sab maded","tell me the date sab made","tell me the date sab maded",
         "sab made date in sab","sab maded date in sab","sab date made in sab",
     },a="20"},
-    -- ⭐ SAB MADE — DAY (day of week SATURDAY)
     {p={
-        -- "does sab made" forms
         "what day does sab made","what day does sab maded","what day sab made","what day sab maded",
         "what day did sab made","what day did sab maded","what day was sab made","what day was sab maded",
-        -- reordered
         "sab made what day","sab maded what day","sab made day of week","sab maded day of week",
         "day of week sab made","day of week sab maded","sab day of week","sab weekday",
-        -- whats/what is
         "what is sab made day","whats sab made day","what is sab maded day","whats sab maded day",
         "what is the sab made day","whats the sab made day","what is the sab maded day","whats the sab maded day",
         "what is the day of sab made","what is the day of sab maded","whats the day of sab made","whats the day of sab maded",
-        -- which
         "which day sab made","which day sab maded","which day was sab made","which day was sab maded",
         "which day did sab made","which day did sab maded",
-        -- on what day
         "on what day did sab made","on what day was sab made","on what day did sab maded","on what day was sab maded",
-        -- in sab
         "what day did sab made in sab","what day was sab made in sab","what day did sab get made","what day did sab get maded",
-        -- made on day
         "sab made on day","sab maded on day","sab was made on day","sab was maded on day",
-        -- day when
         "when day sab made","when day sab maded","day when sab made","day when sab maded",
         "day of sab made","day of sab maded","day of when sab was made","day of when sab was maded",
         "sab day of made","sab day of maded","the day sab made","the day sab maded",
-        -- give/tell me
         "give me the day sab made","give me the day sab maded","tell me the day sab made","tell me the day sab maded",
         "sab made day in sab","sab maded day in sab","sab day made in sab",
     },a="15"},
-    -- ⭐ DUEL MACHINE RELEASE — full date
     {p={
         "when was duel machine released in sab","when was duel machine released","when duel machine released",
         "when was the duel machine released in sab","when was the duel machine released","when the duel machine released",
@@ -578,7 +1211,6 @@ local BRAINROT_KNOWLEDGE = {
         "when was duel machine launched","when was duels machine launched","when duel machine launch","when duels machine launch",
         "when was duel machine added to sab","when was duels machine added to sab","when was the duel machine added to sab",
     },a="JANUARY102026"},
-    -- ⭐ DUEL MACHINE — month
     {p={
         "what month duel machine released","what month was duel machine released","which month duel machine released","which month was duel machine released",
         "what month was the duel machine released","which month was the duel machine released",
@@ -600,7 +1232,6 @@ local BRAINROT_KNOWLEDGE = {
         "what month duel machine launched","which month duel machine launched","what month duels machine launched","which month duels machine launched",
         "duel machine launch month","duels machine launch month",
     },a="JANUARY"},
-    -- ⭐ DUEL MACHINE — year
     {p={
         "what year duel machine released","what year was duel machine released","which year duel machine released","which year was duel machine released",
         "what year was the duel machine released","which year was the duel machine released",
@@ -622,7 +1253,6 @@ local BRAINROT_KNOWLEDGE = {
         "what year duel machine launched","which year duel machine launched","what year duels machine launched","which year duels machine launched",
         "duel machine launch year","duels machine launch year",
     },a="2026"},
-    -- ⭐ DUEL MACHINE — day of week
     {p={
         "what day duel machine released","what day was duel machine released","which day duel machine released","which day was duel machine released",
         "what day was the duel machine released","which day was the duel machine released",
@@ -645,7 +1275,6 @@ local BRAINROT_KNOWLEDGE = {
         "what day duel machine launched","which day duel machine launched","what day duels machine launched","which day duels machine launched",
         "duel machine launch day","duels machine launch day",
     },a="10"},
-    -- ⭐ DUEL MACHINE — day number
     {p={
         "what day number duel machine released","what day number was duel machine released","which day number duel machine released","which day number was duel machine released",
         "what day number was the duel machine released","which day number was the duel machine released",
@@ -668,7 +1297,6 @@ local BRAINROT_KNOWLEDGE = {
         "what day number duel machine launched","which day number duel machine launched","what day number duels machine launched","which day number duels machine launched",
         "duel machine launch day number","duels machine launch day number",
     },a="10"},
-    -- ⭐ TRADE PLAZA RELEASE — full date
     {p={
         "when was trade plaza released in sab","when was trade plaza released","when trade plaza released",
         "when was the trade plaza released in sab","when was the trade plaza released","when the trade plaza released",
@@ -692,7 +1320,6 @@ local BRAINROT_KNOWLEDGE = {
         "trade plaza added date","trade plaza launch date","trade plaza launch",
         "when trade plaza launch","when trade plaza launched","when was trade plaza launched",
         "trade plaza released","trade plaza launch date in sab","when did trade plaza come to sab",
-        -- ⭐ MORE variations
         "when did trade plaza release in sab","when did the trade plaza release in sab","when was trade plaza released to sab",
         "trade plaza release date in sab","trade plaza released date in sab","when did they add trade plaza","when did they add the trade plaza",
         "when did they add trade plaza to sab","when did they add the trade plaza to sab",
@@ -716,7 +1343,6 @@ local BRAINROT_KNOWLEDGE = {
         "when did the trade plaza come out in sab","when did trade plaza come out in sab",
         "trade plaza release day in sab","when trade plaza came to sab","when did trade plaza get added","when did trade plaza get added in sab",
     },a="JUNE202026"},
-    -- ⭐ TRADE PLAZA — month
     {p={
         "trade plaza release month","trade plaza month released","trade plaza month","month trade plaza was made","month trade plaza was maded",
         "release month of trade plaza","what month was trade plaza released","what month trade plaza released",
@@ -734,7 +1360,6 @@ local BRAINROT_KNOWLEDGE = {
         "what month trade plaza launched","which month trade plaza launched","trade plaza launch month",
         "what month trade plaza was released","what month trade plaza was maded","what month trade plaza was made",
     },a="JUNE"},
-    -- ⭐ TRADE PLAZA — year
     {p={
         "trade plaza release year","trade plaza year released","trade plaza year","year of release trade plaza","year trade plaza was released",
         "what year was trade plaza released","what year trade plaza released",
@@ -753,7 +1378,6 @@ local BRAINROT_KNOWLEDGE = {
         "what year trade plaza launched","which year trade plaza launched","trade plaza launch year",
         "what year trade plaza was released","what year trade plaza was maded","what year trade plaza was made",
     },a="2026"},
-    -- ⭐ TRADE PLAZA — day of week
     {p={
         "what day trade plaza released","what day was trade plaza released","which day trade plaza released","which day was trade plaza released",
         "what day was the trade plaza released","which day was the trade plaza released",
@@ -768,7 +1392,6 @@ local BRAINROT_KNOWLEDGE = {
         "what day trade plaza launched","which day trade plaza launched","trade plaza launch day",
         "what day trade plaza was released","what day trade plaza was maded","what day trade plaza was made",
     },a="22"},
-    -- ⭐ TRADE PLAZA — day number
     {p={
         "what day number trade plaza released","what day number was trade plaza released","which day number trade plaza released","which day number was trade plaza released",
         "what day number was the trade plaza released","which day number was the trade plaza released",
@@ -830,7 +1453,6 @@ local BRAINROT_KNOWLEDGE = {
         "name the fourth og","name the fourth og we added","tell me the fourth og","tell me the fourth og we added",
     },a="JOHNPORK"},
     {p={
-        -- ⭐ LAST OG we added → JOHNPORK
         "last og we added","the last og we added","what is the last og we added","whats the last og we added",
         "which is the last og we added","which was the last og we added","which og did we add last","what og did we add last",
         "what og was added last","what was the last og we added","last og added","the last og added",
@@ -879,9 +1501,7 @@ local BRAINROT_KNOWLEDGE = {
     {p={"color of cyber"},a="BLUE"},
     {p={"color of phantom"},a="BLACK"},
     {p={"color of crystal"},a="BLUEPURPLE"},
-    -- ⭐ NEW: color riddles
     {p={
-        -- strawberry elephant → RED
         "what color is strawberry elephant","what colour is strawberry elephant",
         "what color is the strawberry elephant","what colour is the strawberry elephant",
         "what is the color of strawberry elephant","whats the color of strawberry elephant",
@@ -900,7 +1520,6 @@ local BRAINROT_KNOWLEDGE = {
         "what is strawberry elephant color","whats strawberry elephant color",
     },a="RED"},
     {p={
-        -- johnpork → PINK
         "what color is johnpork","what colour is johnpork",
         "what color is john pork","what colour is john pork",
         "what color is the johnpork","what colour is the johnpork",
@@ -927,7 +1546,6 @@ local BRAINROT_KNOWLEDGE = {
         "what is john pork color","whats john pork color",
     },a="PINK"},
     {p={
-        -- skibidi toilet → WHITE
         "what color is skibidi toilet","what colour is skibidi toilet",
         "what color is the skibidi toilet","what colour is the skibidi toilet",
         "what is the color of skibidi toilet","whats the color of skibidi toilet",
@@ -945,7 +1563,6 @@ local BRAINROT_KNOWLEDGE = {
         "what is skibidi toilet color","whats skibidi toilet color",
     },a="WHITE"},
     {p={
-        -- meowl → BROWN
         "what color is meowl","what colour is meowl",
         "what color is the meowl","what colour is the meowl",
         "what is the color of meowl","whats the color of meowl",
@@ -996,22 +1613,18 @@ local BRAINROT_KNOWLEDGE = {
     {p={"seventeenth machine","machine 17"},a="SUMMERFUSE"},
     {p={"eighteenth machine","machine 18"},a="LOSTRADERS"},
     {p={"how many machines"},a="18"},
-    -- ⭐ HOW MANY GAMES DID SAMMY MAKE → 8
     {p={
-        -- exact / near-exact
         "how many games did i make","how many games did sammy make","how many games have i made","how many games have you made",
         "how many games did you make","how many games did the developer make","how many games did the developer made",
         "how many games has sammy made","how many games has sammy made in total","how many games has the developer made",
         "how many games did sammy made","how many games did i made","how many games i made","how many games i have made",
         "how many games you made","how many games you have made","how many games we made","how many games have we made",
-        -- what / which question forms
         "what is the number of games i made","whats the number of games i made","what is the number of games sammy made",
         "whats the number of games sammy made","what is the number of games you made","whats the number of games you made",
         "what number of games did i make","what number of games did sammy make","what number of games did you make",
         "which number of games did i make","which number of games did sammy make",
         "what is the total number of games i made","whats the total number of games i made","what is the total number of games sammy made",
         "whats the total number of games sammy made","what is the total number of games you made","whats the total number of games you made",
-        -- total / count forms
         "total games i made","total games sammy made","total games you made","total games made","total games made by sammy",
         "total games made by the developer","total number of games","total number of games i made","total number of games sammy made","total number of games you made",
         "how many total games did i make","how many total games did sammy make","how many total games did you make",
@@ -1029,7 +1642,6 @@ local BRAINROT_KNOWLEDGE = {
         "how many games did he make","how many games did he made","how many games has he created",
         "number of games i made","number of games sammy made","number of games you made","number of games made",
         "number of games made by sammy","number of games made by the developer","number of games the developer made",
-        -- other phrasings
         "how many games are there","how many games in total","how many games in total did sammy make","how many games in total did i make",
         "how many games has sammy developed","how many games has the developer developed",
         "how many games have been made","how many games have been made by sammy","how many games have been made by the developer",
@@ -1038,7 +1650,6 @@ local BRAINROT_KNOWLEDGE = {
         "how many games did the developer publish","how many games has sammy published","how many games has the developer published",
         "games made count","games made","games i made","games sammy made","games you made","games developer made",
         "how many games sammy made","how many games i made total","how many games sammy made total",
-        -- short
         "how many games did you make total","how many games did he make total","how many games he made","how many games he made total",
         "sammy games count","count of games made by sammy","count of games made by the developer",
     },a="8"},
@@ -1058,9 +1669,7 @@ local BRAINROT_KNOWLEDGE = {
     {p={"what month is my birthday","my birthday month","which month is my birthday","birthday month","month of my birthday","what month was i born in"},a="FEBRUARY"},
     {p={"what day is my birthday","my birthday day","which day is my birthday","birthday day","day of my birthday","what day was i born"},a="24"},
     {p={
-    -- original birthday patterns
     "what day and month is my birthday","when is my birthday","whats my birthday","what is my birthday","my full birthday","birthday",
-    -- ⭐ birth date variations
     "my birth date","my birthdate","my birth day date","my birth of date","my birth of dates","my date of birth","my d o b","my dob",
     "what is my birth date","whats my birth date","what is my birthdate","whats my birthdate","what is my birth of date","whats my birth of date",
     "what is my date of birth","whats my date of birth","what is my dob","whats my dob","what is my d o b","whats my d o b",
@@ -1075,32 +1684,107 @@ local BRAINROT_KNOWLEDGE = {
     "my birthday date","my birthday of date","what is my birthday date","whats my birthday date",
 },a="FEBRUARY 24"},
     {p={"what year am i born","birth year","what year was i born","when was i born"},a="2002"},
+    -- ⭐ COMBINED: year i was born + day of month i was born → 200224
+    {p={
+        "the year i was born and the day of the month i was born",
+        "the year i was born and the day of month i was born",
+        "the year i was born and day of the month i was born",
+        "the year i was born and day of month i was born",
+        "year i was born and the day of the month i was born",
+        "year i was born and the day of month i was born",
+        "year i was born and day of the month i was born",
+        "year i was born and day of month i was born",
+        "what year i was born and what day of the month i was born",
+        "what year i was born and day of the month i was born",
+        "what year i was born and the day i was born",
+        "what year was i born and what day of the month was i born",
+        "what year was i born and the day of the month was i born",
+        "what year was i born and what day was i born",
+        "what year and what day of the month was i born",
+        "what year and what day was i born",
+        "what year and day of the month was i born",
+        "what year and day was i born",
+        "what year and the day was i born",
+        "the year and the day of the month i was born",
+        "the year and day of the month i was born",
+        "the year and the day i was born",
+        "the year and day i was born",
+        "year and day of the month i was born",
+        "year and day i was born",
+        "year and date i was born",
+        "what year and date i was born",
+        "what year and date was i born",
+        "whats the year and day i was born",
+        "whats the year and the day i was born",
+        "whats the year and day of the month i was born",
+        "whats the year and the day of the month i was born",
+        "what is the year and day i was born",
+        "what is the year and the day i was born",
+        "what is the year and day of the month i was born",
+        "what is the year and the day of the month i was born",
+        "what year born and what day born",
+        "what year i was born and what day i was born",
+        "what year i was born and what day of month i was born",
+        "when i was born what year and day",
+        "when i was born what year and what day",
+        "when i was born and what day",
+        "when i was born and day of month",
+        "when i was born and the day of the month",
+        "my birth year and day of month",
+        "my birth year and my birth day",
+        "my birth year and birth day",
+        "my birth year and my birth date",
+        "my birth year and day",
+        "birth year and day",
+        "birth year and day of month",
+        "birth year and date",
+        "birth year and the day",
+        "my born year and day",
+        "my born year and day of month",
+        "year born and day born",
+        "year of birth and day of month of birth",
+        "year of birth and day of birth",
+        "sammys birth year and day of month",
+        "sammys birth year and day",
+        "sammy birth year and day of month",
+        "sammy birth year and day",
+        "sammy born year and day",
+        "sammy born year and day of month",
+        "sammy year and day born",
+        "sammy year and day of month born",
+        "sammys year and day born",
+        "sammys year and day of month born",
+        "tell me the year i was born and the day of the month i was born",
+        "tell me the year and day i was born",
+        "give me the year i was born and the day i was born",
+        "give me the year and day of the month i was born",
+        "the year of my birth and the day of the month of my birth",
+        "year of my birth and day of the month of my birth",
+        "year and day of my birth",
+        "my birth year and birth day of month",
+        "what year and what day of the month i was born",
+    },a="200224"},
     {p={"where was i born","birthplace","where was sammy born"},a="ALGERIA"},
     {p={
-        -- exact / near-exact
         "where am i from","where im from","where i am from","where i from",
         "my country","what is my country","whats my country","which is my country","which country",
         "what country am i from","what country i am from","what country im from","what country am i",
         "which country am i from","which country i am from","which country am i in","what country am i in",
         "what country do i live in","what country do you live in","which country do i live in","which country do you live in",
         "what country do i live","which country do i live","what country do i stay in","what country do i stay",
-        -- location phrasings
         "where am i located","where im located","where i am located","my location","what is my location","whats my location",
         "where am i right now","where do i live","where do i currently live","where do i stay","where im at","where i am at","where i at",
         "current location","my current location","my current country","whats my current country","where am i currently",
         "which country am i currently in","what country am i currently in",
-        -- sammy direct
         "sammy country","sammy from","where is sammy from","where sammy from","where sammy is from",
         "what country is sammy from","which country is sammy from","what country is sammy","which country is sammy",
         "what country does sammy live in","what country does sammy live","which country does sammy live in",
         "sammy location","sammys country","sammys location","sammys home","sammy home",
         "where does sammy live","where does sammy live in","where does sammy stay","where does sammy stay in",
         "where do you live sammy","where do you stay sammy","where does the developer live","where does the developer stay",
-        -- country of origin
         "my country of origin","country of origin","whats my country of origin","what is my country of origin",
-        -- short
         "where i live","where i stay","where do i live in","country","my nation","my home country","home country","where am i",
-    },a="UNITEDSTATES"},
+    },a="BRAZIL"},
     {p={"nationality","what is my nationality"},a="BRAZILIAN"},
     {p={"state","city","what state am i from","what city am i from"},a="SAOPAULO"},
     {p={"roblox username","username","what is my username"},a="SPYDERSAMMY"},
@@ -1266,7 +1950,6 @@ do
         local n=0
         for w in pairs(ww) do n=n+1; if not rr[w] then return false end end
         if n==1 then for w in pairs(rr) do if not ww[w] then return false end end end
-        -- ⭐ stricter: short patterns (1-3 words) must not have extra message words
         if n <= 3 then
             local mcount = 0
             for _ in pairs(rr) do mcount = mcount + 1 end
@@ -1294,9 +1977,21 @@ do
                 end
             end
         end
-        if bestEntry then return bestEntry.a:gsub("%s+",""):upper(), bestEntry.a, bestPattern end
-        return nil, nil, nil
+        if bestEntry then return bestEntry.a:gsub("%s+",""):upper(), bestEntry.a, bestPattern, bestScore end
+        return nil, nil, nil, nil
     end
+    -- ⭐ NEW: reverse lookup — check if a single word IS a known answer
+    local function findByName(word)
+        if not word or word == "" then return nil end
+        local up = tostring(word):gsub("[^%w]",""):upper()
+        if up == "" or #up < 2 then return nil end
+        for _, e in ipairs(BRAINROT_KNOWLEDGE) do
+            local a = tostring(e.a):gsub("[^%w]",""):upper()
+            if a == up and #up >= 2 then return a end
+        end
+        return nil
+    end
+    Riddle.findByName = findByName
     function Riddle.solve(message)
         if not message or message=="" then return nil end
         local working = tostring(message):lower()
@@ -1330,7 +2025,35 @@ do
             end
         end
         if #pieces <= 1 then
-            local baseAnswer, originalAnswer, matchedPat = findFirstMatch(message)
+            local baseAnswer, originalAnswer, matchedPat, baseScore = findFirstMatch(message)
+            -- ⭐ FIX: word-by-word only overrides WEAK base matches
+            -- Prevents "sammy zodiac" → SAMMYPISCES (should stay PISCES)
+            local ws = {}
+            for w in message:gmatch("%S+") do table.insert(ws, w) end
+            if #ws >= 2 and #ws <= 12 then
+                local wsparts = {}
+                local allW = true
+                for _, w in ipairs(ws) do
+                    local clean_w = w:gsub("[^%w]","")
+                    if clean_w == "" then
+                        -- skip pure punctuation
+                    elseif clean_w:match("^%d+$") then
+                        table.insert(wsparts, clean_w)
+                    else
+                        local a = findFirstMatch(clean_w) or findByName(clean_w)
+                        if not a then allW = false; break end
+                        table.insert(wsparts, a)
+                    end
+                end
+                if allW and #wsparts > 1 then
+                    local combined = table.concat(wsparts)
+                    if not baseAnswer then return combined end
+                    -- Only override if base came from a weak/partial match
+                    if (baseScore or 0) < 100 and #combined > #baseAnswer then
+                        return combined
+                    end
+                end
+            end
             if not baseAnswer then return nil end
             local numsInAnswer = {}
             local local_hadDigit = false
@@ -1350,7 +2073,7 @@ do
                 local numOnly = piece:match("^(%d+)$")
                 if numOnly then table.insert(answerParts, numOnly)
                 else
-                    local a = findFirstMatch(piece)
+                    local a = findFirstMatch(piece) or findByName(piece)
                     if not a then allOk = false; break end
                     table.insert(answerParts, a)
                 end
@@ -1366,19 +2089,49 @@ do
         local l = text:lower():gsub("%s+", " ")
         local hasQuestion = l:find("%?") ~= nil
         local startsWithQ = l:match("^%s*(what%s+is)") or l:match("^%s*(whats)") or l:match("^%s*(who)") or l:match("^%s*(where)") or l:match("^%s*(when)") or l:match("^%s*(how%s+many)") or l:match("^%s*(which)") or l:match("^%s*(first)") or l:match("^%s*(second)") or l:match("^%s*(third)") or l:match("^%s*(fourth)") or l:match("^%s*(fifth)") or l:match("^%s*(last)") or l:match("^%s*(newest)") or l:match("^%s*(best)") or l:match("^%s*(rarest)") or l:match("^%s*(today)") or l:match("^%s*(name)") or l:match("^%s*(month)") or l:match("^%s*(day)") or l:match("^%s*(holiday)") or l:match("^%s*(tomorrow)") or l:match("^%s*(skin)") or l:match("^%s*(age)") or l:match("^%s*(birthday)") or l:match("^%s*(favorite)") or l:match("^%s*(phoenix)")
-        local hasKeyword = l:find("og",1,true) or l:find("mutation",1,true) or l:find("machine",1,true) or l:find("brainrot",1,true) or l:find("color",1,true) or l:find("favorite",1,true) or l:find("fav",1,true) or l:find("name",1,true) or l:find("age",1,true) or l:find("birthday",1,true) or l:find("country",1,true) or l:find("rarity",1,true) or l:find("trait",1,true) or l:find("sammy",1,true) or l:find("developer",1,true) or l:find("creator",1,true) or l:find("owner",1,true) or l:find("game",1,true) or l:find("secret",1,true) or l:find("admin",1,true) or l:find("sab",1,true) or l:find("steal",1,true) or l:find("pet",1,true) or l:find("cat",1,true) or l:find("kitty",1,true) or l:find("sport",1,true) or l:find("food",1,true) or l:find("animal",1,true) or l:find("username",1,true) or l:find("city",1,true) or l:find("nationality",1,true) or l:find("year",1,true) or l:find("month",1,true) or l:find("day",1,true) or l:find("today",1,true) or l:find("date",1,true) or l:find("planet",1,true) or l:find("earth",1,true) or l:find("goat",1,true) or l:find("taco",1,true) or l:find("rebirth",1,true) or l:find("fuse",1,true) or l:find("griffin",1,true) or l:find("craft",1,true) or l:find("multiplier",1,true) or l:find("earn",1,true) or l:find("item",1,true) or l:find("phoenix",1,true) or l:find("rarest",1,true) or l:find("rare",1,true) or l:find("skin",1,true) or l:find("colour",1,true) or l:find("color",1,true) or l:find("tone",1,true) or l:find("last name",1,true) or l:find("surname",1,true) or l:find("device",1,true) or l:find("laptop",1,true) or l:find(" pc",1,true) or l:find("computer",1,true) or l:find("phone",1,true) or l:find("mobile",1,true) or l:find("tablet",1,true) or l:find("ipad",1,true) or l:find("iphone",1,true) or l:find("desktop",1,true) or l:find("macbook",1,true) or l:find("chromebook",1,true) or l:find("console",1,true) or l:find("xbox",1,true) or l:find("playstation",1,true) or l:find("nintendo",1,true) or l:find("using",1,true) or l:find("playing",1,true) or l:find("location",1,true) or l:find("live",1,true) or l:find("luck",1,true) or l:find("event",1,true) or l:find("action",1,true) or l:find("state",1,true) or l:find("reason",1,true) or l:find("amount",1,true) or l:find("count",1,true) or l:find("minifigure",1,true) or l:find("minifigures",1,true) or l:find("series",1,true) or l:find("toy",1,true)
+        local hasKeyword = l:find("og",1,true) or l:find("mutation",1,true) or l:find("machine",1,true) or l:find("brainrot",1,true) or l:find("color",1,true) or l:find("favorite",1,true) or l:find("fav",1,true) or l:find("name",1,true) or l:find("age",1,true) or l:find("birthday",1,true) or l:find("country",1,true) or l:find("rarity",1,true) or l:find("trait",1,true) or l:find("sammy",1,true) or l:find("developer",1,true) or l:find("creator",1,true) or l:find("owner",1,true) or l:find("game",1,true) or l:find("secret",1,true) or l:find("admin",1,true) or l:find("sab",1,true) or l:find("steal",1,true) or l:find("pet",1,true) or l:find("cat",1,true) or l:find("kitty",1,true) or l:find("sport",1,true) or l:find("food",1,true) or l:find("animal",1,true) or l:find("username",1,true) or l:find("city",1,true) or l:find("nationality",1,true) or l:find("year",1,true) or l:find("month",1,true) or l:find("day",1,true) or l:find("today",1,true) or l:find("date",1,true) or l:find("planet",1,true) or l:find("earth",1,true) or l:find("goat",1,true) or l:find("taco",1,true) or l:find("rebirth",1,true) or l:find("fuse",1,true) or l:find("griffin",1,true) or l:find("craft",1,true) or l:find("multiplier",1,true) or l:find("earn",1,true) or l:find("item",1,true) or l:find("phoenix",1,true) or l:find("rarest",1,true) or l:find("rare",1,true) or l:find("skin",1,true) or l:find("colour",1,true) or l:find("color",1,true) or l:find("tone",1,true) or l:find("last name",1,true) or l:find("surname",1,true) or l:find("device",1,true) or l:find("laptop",1,true) or l:find(" pc",1,true) or l:find("computer",1,true) or l:find("phone",1,true) or l:find("mobile",1,true) or l:find("tablet",1,true) or l:find("ipad",1,true) or l:find("iphone",1,true) or l:find("desktop",1,true) or l:find("macbook",1,true) or l:find("chromebook",1,true) or l:find("console",1,true) or l:find("xbox",1,true) or l:find("playstation",1,true) or l:find("nintendo",1,true) or l:find("using",1,true) or l:find("playing",1,true) or l:find("location",1,true) or l:find("live",1,true) or l:find("luck",1,true) or l:find("event",1,true) or l:find("action",1,true) or l:find("state",1,true) or l:find("reason",1,true) or l:find("amount",1,true) or l:find("count",1,true) or l:find("minifigure",1,true) or l:find("minifigures",1,true) or l:find("series",1,true) or l:find("toy",1,true) or l:find("jandel",1,true)
         local isSabRiddle = l:find("sab",1,true) or l:find("release",1,true) or l:find("steal",1,true)
-        -- ⭐ NEW: check for question words ANYWHERE in message (not just at start)
         local hasInnerQ = l:find("%f[%a]what%f[%A]") or l:find("%f[%a]where%f[%A]") or l:find("%f[%a]who%f[%A]") or l:find("%f[%a]which%f[%A]") or l:find("%f[%a]when%f[%A]") or l:find("%f[%a]how%f[%A]") or l:find("%f[%a]why%f[%A]")
         local wordCount = 0
         for _ in l:gmatch("%S+") do wordCount = wordCount + 1 end
         if wordCount < 2 then return false end
         local isMultiPart = l:find(" and ",1,true) ~= nil or l:find(" plus ",1,true) ~= nil
-        if hasQuestion or startsWithQ or isSabRiddle or hasInnerQ or (hasKeyword and isMultiPart and wordCount >= 3) then
+        if hasQuestion or startsWithQ or isSabRiddle or hasInnerQ or (hasKeyword and isMultiPart and wordCount >= 3) or (hasKeyword and wordCount == 2) then
             return hasKeyword or startsWithQ or hasQuestion or hasInnerQ
         end
         return false
     end
+    -- ⭐ NEW: broader check for riddle-like text (word-by-word KB check)
+    function Riddle.isRiddleLike(text)
+        if not text or text == "" then return false end
+        if Riddle.isActual(text) then return true end
+        local ws = {}
+        for w in text:gmatch("%S+") do table.insert(ws, w) end
+        if #ws < 2 or #ws > 8 then return false end
+        local realWords = 0
+        -- ⭐ NEW: whole-text KB match (2+ word pattern) → it's a riddle
+        do
+            local kbA, _, kbP = findFirstMatch(text)
+            if kbA and kbP then
+                local pw = 0
+                for _ in kbP:gmatch("%S+") do pw = pw + 1 end
+                if pw >= 2 then return true end
+            end
+        end
+        for _, w in ipairs(ws) do
+            local cw = w:gsub("[^%w]","")
+            if cw ~= "" and not cw:match("^%d+$") then
+                local lower = cw:lower()
+                if not FILL[lower] and #lower > 1 then
+                    realWords = realWords + 1
+                    if not (findFirstMatch(cw) or findByName(cw)) then return false end
+                end
+            end
+        end
+        return realWords >= 2
+    end
+    -- ⭐ FIX: expose findFirstMatch for external use (exact-match priority)
+    Riddle.findFirstMatch = findFirstMatch
 end
 
 ----------------------------------------------------------------------
@@ -1394,7 +2147,6 @@ do
     local UI_NOISE = {"you bought","you purchased","added to your base","brainrot added","purchase complete","buy complete","coins spent","spent coins","you sold","you traded","trade complete","you earned","slot","spin wheel","spin result","lucky block","you opened","you unlocked","new brainrot","purchased","added to base","robux spent","sold out","code sold out","already sold out","out of stock","no longer available","code expired","invalid code","code is invalid","redeem limit","limit reached","max redeems","already redeemed","already used","not available","code unavailable","unavailable","expired code","this code is expired","code has expired","code no longer","no longer valid","not valid anymore","sold out!","code already","already sold"}
     local RELATION_WORDS = {mom="MOM",mother="MOM",mum="MOM",dad="DAD",father="DAD",brother="BROTHER",sister="SISTER",grandma="GRANDMA",grandmother="GRANDMA",grandpa="GRANDPA",grandfather="GRANDPA",aunt="AUNT",uncle="UNCLE",cousin="COUSIN",son="SON",daughter="DAUGHTER",wife="WIFE",husband="HUSBAND",friend="FRIEND",cat="CAT",dog="DOG",pet="PET",teacher="TEACHER",coach="COACH"}
     local HOLIDAYS = {"christmas","easter","halloween","newyear","thanksgiving","valentine","birthday"}
-        -- ⭐ Location words (countries / cities / places)
     local LOCATION_WORDS = {
         spain=true, brazil=true, algeria=true, france=true, italy=true, germany=true,
         usa=true, america=true, uk=true, england=true, scotland=true, wales=true, ireland=true,
@@ -1702,7 +2454,6 @@ end
 ----------------------------------------------------------------------
 local Util = {}
 do
-    local CUE_PREFIXES = {"the riddle is ","riddle is ","the code is ","use this code ","use code ","code is ","question is "}
     function Util.stripRich(s) if type(s) ~= "string" then return tostring(s) end return (s:gsub("<[^>]->", "")) end
     function Util.trim(s) return (s or ""):gsub("^%s+", ""):gsub("%s+$", "") end
     function Util.tokenize(text)
@@ -1715,20 +2466,35 @@ do
         t = t:gsub("<[^>]->", ""):gsub("%s+", " ")
         return t:match("^%s*(.-)%s*$") or ""
     end
+    -- ⭐ FIX: robust cue-prefix stripping (CASE-INSENSITIVE)
+    -- handles "Use code...", "USE CODE!!", "Code is..", etc.
     function Util.stripCuePrefix(text)
         if not text or text == "" then return text end
-        local l = text:lower()
-        for _, p in ipairs(CUE_PREFIXES) do
-            if l:sub(1, #p) == p then
-                local stripped = text:sub(#p + 1):gsub("^%s+", ""):gsub("%s+$", "")
-                if stripped ~= "" then return stripped end
+        local lowerText = text:lower()
+        local patterns = {
+            "^%s*the%s+riddle%s+is[%s%p]*",
+            "^%s*riddle%s+is[%s%p]*",
+            "^%s*the%s+code%s+is[%s%p]*",
+            "^%s*code%s+is[%s%p]*",
+            "^%s*use%s+this%s+code[%s%p]*",
+            "^%s*use%s+code[%s%p]*",
+            "^%s*question%s+is[%s%p]*",
+        }
+        for _, pat in ipairs(patterns) do
+            local stripped, n = lowerText:gsub(pat, "")
+            if n > 0 then
+                local prefixLen = #lowerText - #stripped
+                if prefixLen > 0 and prefixLen <= #text then
+                    local orig = text:sub(prefixLen + 1)
+                    orig = orig:gsub("^[%s%p]+", ""):gsub("[%s%p]+$", "")
+                    if orig ~= "" then return orig end
+                end
             end
         end
         return text
     end
 end
 
--- ⭐ SOLD-OUT / INVALID HARD CHECK
 local SOLD_OUT_MARKERS = {"sold out","out of stock","no longer available","already redeemed","already used","code expired","code has expired","this code is expired","redeem limit","limit reached","max redeems","not available","code unavailable","unavailable","code no longer","no longer valid","not valid anymore","invalid code","code is invalid","code invalid","code not valid","code used","already sold"}
 local function isSoldOutOrInvalid(text)
     local l = tostring(text or ""):lower()
@@ -1738,15 +2504,13 @@ end
 
 local Chk = {}
 do
-    -- ⭐ FIX: riddle-like text ko blacklist se exempt karo
     local BLACKLISTED_PHRASES = {"sammy has spawned","sammy spawned","invalid code","font color","coins shop","brainrot trader","robux shop","spin wheel","event has started","to buy this","your base is already locked","you locked your base for","broke into your base","someone is stealing","trade has been completed"}
     for _, m in ipairs(SOLD_OUT_MARKERS) do table.insert(BLACKLISTED_PHRASES, m) end
     function Chk.isBlacklisted(text)
         local lowered = tostring(text or ""):lower():gsub("%s+", " ")
-        -- ⭐ riddle patterns never blacklisted
         if lowered:find("when was", 1, true) or lowered:find("what is", 1, true) or lowered:find("whats", 1, true)
            or lowered:find("which", 1, true) or lowered:find("how many", 1, true) or lowered:find("where", 1, true)
-           or lowered:find("who is", 1, true) then
+           or lowered:find("who is", 1, true) or lowered:find("code is", 1, true) or lowered:find("use code", 1, true) then
             return false
         end
         for _, phrase in ipairs(BLACKLISTED_PHRASES) do if lowered:find(phrase, 1, true) then return true end end
@@ -1755,6 +2519,12 @@ do
     function Chk.isCodeCue(text)
         local l = tostring(text or ""):lower():gsub("%s+", " ")
         return l:find("use code",1,true) or l:find("the code is",1,true) or l:find("code is",1,true) or l:find("riddle is",1,true) or l:find("question is",1,true)
+    end
+    -- ⭐ FIX: separate check for ACTUAL code cues (only "use code"/"code is")
+    -- "riddle is" / "question is" mean a RIDDLE, not a code
+    function Chk.isActualCodeCue(text)
+        local l = tostring(text or ""):lower():gsub("%s+", " ")
+        return l:find("use code",1,true) or l:find("the code is",1,true) or l:find("code is",1,true)
     end
     function Chk.isSuccess(lower)
         return lower:find("spawned!",1,true) or lower:find("has spawned",1,true) or lower:find("code redeemed",1,true) or lower:find("successfully redeemed",1,true) or lower:find("you redeemed",1,true) or lower:find("code accepted",1,true) or lower:find("you got",1,true) or lower:find("you received",1,true) or lower:find("congratulations",1,true) or lower:find("luck activated",1,true)
@@ -1772,7 +2542,7 @@ do
 end
 
 ----------------------------------------------------------------------
--- ⭐ WEBHOOK (rate-limit safe queue + batch + dedup)
+-- WEBHOOK
 ----------------------------------------------------------------------
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1551541428415373353/V0mWjWw54_ltcq3L_5DAGSOKTMjYPQzJJ7OZbQv8GVpJMGVSWep6z1C7gwYQo4d-IfDu"
 local WEBHOOK_ENABLED = WEBHOOK_URL ~= "" and WEBHOOK_URL ~= nil
@@ -1786,23 +2556,19 @@ do
         if ok and res then return true, res end
         return false, "no-http-method"
     end
-
-    -- ⭐ QUEUE (batching + dedup + rate-limit safe)
     local queue = {}
     local sending = false
-    local MIN_GAP = 3          -- seconds between Discord messages
-    local BATCH_WAIT = 2.5     -- collect window (batch multiple redeems)
-    local BATCH_MAX = 6        -- max embeds per message (Discord allows 10)
-    local DEDUP_WINDOW = 90    -- skip same brainrot+income within 90s
+    local MIN_GAP = 3
+    local BATCH_WAIT = 2.5
+    local BATCH_MAX = 6
+    local DEDUP_WINDOW = 90
     local recent = {}
-
     local function cleanRecent()
         local now = os.clock()
         for k, t in pairs(recent) do
             if now - t > DEDUP_WINDOW then recent[k] = nil end
         end
     end
-
     local function buildEmbed(d, withPlayer)
         local typeLabel = (d.redeemType == "Riddle") and "🧩 Riddle" or "🎟️ Code"
         local title = (d.redeemType == "Riddle") and "🧩 Riddle Solved!" or "🎁 Code Redeemed!"
@@ -1823,7 +2589,6 @@ do
         end
         return { title = title, color = color, fields = fields, footer = { text = "VYRE Redeemer" } }
     end
-
     local function sendBatch(batch)
         if #batch == 0 then return end
         local embeds = {}
@@ -1838,7 +2603,6 @@ do
                 Body=HttpService:JSONEncode(body)})
         end)
     end
-
     local function processQueue()
         while #queue > 0 do
             task.wait(BATCH_WAIT)
@@ -1852,7 +2616,6 @@ do
         end
         sending = false
     end
-
     function Webhook.sendRedeem(code, brainrotName, income, redeemType, riddleText)
         if not WEBHOOK_ENABLED then return end
         if isSoldOutOrInvalid(code) or isSoldOutOrInvalid(brainrotName or "") then return end
@@ -1867,7 +2630,6 @@ do
             task.spawn(processQueue)
         end
     end
-
     function Webhook.sendStartup()
         if not WEBHOOK_ENABLED then return end
         task.spawn(function()
@@ -1933,7 +2695,7 @@ end
 
 local RB = {}
 do
-    local _spamRedeem, _spamCount, SPAM_DELAY = true, 22, 000000000000.0000000000001
+    local _spamRedeem, _spamCount, SPAM_DELAY = true, 20, 000000000000.0000000000001
     local function isOurGui(instance)
         local p, n = instance, 0
         while p and n < 10 do if p.Name == "NullHub" then return true end; p = p.Parent; n = n + 1 end
@@ -2127,7 +2889,7 @@ local lastSuccessfulRedeem, REDEEM_LOCKOUT = 0, 6
 local lastAutoEnable, _webhookStartupSent = 0, false
 
 ----------------------------------------------------------------------
--- COLORS + HELPERS (v20 BLUE theme)
+-- COLORS + HELPERS
 ----------------------------------------------------------------------
 local C = {
     bg=Color3.fromRGB(6, 6, 9), card=Color3.fromRGB(18, 18, 24),
@@ -2178,7 +2940,7 @@ local function drag(handle, target)
 end
 
 ----------------------------------------------------------------------
--- ANIMATION MODULE (v20 — smooth, no shake)
+-- ANIMATION MODULE
 ----------------------------------------------------------------------
 local AnimH = { settingsOpen = false, collapsed = false }
 do
@@ -2324,7 +3086,7 @@ end
 
     local main = new("Frame", { Name="Main", Size=UDim2.fromOffset(BAR_W, BAR_H), AnchorPoint=Vector2.new(0.5,0), Position=UDim2.new(0.5,0,0,10), BackgroundColor3=C.bg, BorderSizePixel=0, ClipsDescendants=true, ZIndex=1 }, SG)
     U.main = main
-    U.mainScale = new("UIScale", { Scale = 0.35 }, main)
+    U.mainScale = new("UIScale", { Scale = 1 }, main)
     cornerP(main, 14); stroke(main, C.cardBorder, 1.4, 0.25)
 local mainShine = new("UIStroke", { Color = Color3.fromRGB(0, 0, 0), Thickness = 4, Transparency = 0.35, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, main)
 AnimH.pulse(mainShine, "Transparency", 0.35, 0.65, 1.6)
@@ -2433,7 +3195,6 @@ new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transpar
         return card, badge, badgeLbl
     end
 
-    -- MAIN PAGE
     local mY = 0
     local statusPill = new("Frame", { Size=UDim2.new(1,0,0,24), Position=UDim2.fromOffset(0,mY), BackgroundColor3=C.inputBg, BackgroundTransparency=0.1, BorderSizePixel=0, ZIndex=3 }, mainPage)
     cornerP(statusPill, 7); stroke(statusPill, C.green, 1, 0.4)
@@ -2506,7 +3267,6 @@ new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transpar
     aText.TextWrapped = true; aText.TextYAlignment = Enum.TextYAlignment.Center; aText.ZIndex=4
     U.aBox, U.aText = aBox, aText
 
-    -- CONSOLE PAGE
     local conHdr = new("Frame", { Size=UDim2.new(1,0,0,14), Position=UDim2.fromOffset(0,0), BackgroundTransparency=1, BorderSizePixel=0, ZIndex=3 }, consolePage)
     local chLbl = label("CONSOLE LOG", 7, C.accent2, FBK, Enum.TextXAlignment.Left, conHdr)
     chLbl.Size = UDim2.fromOffset(100,14); chLbl.Position = UDim2.fromOffset(2,0); chLbl.ZIndex=4
@@ -2572,7 +3332,6 @@ new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transpar
     end
     U.addConsoleLine, U.typewriterLine, U.shineLine, U.clearConsole = addConsoleLine, typewriterLine, shineLine, clearConsole
 
-    -- SETTINGS PAGE
     local sY = 0
     local function makeSettingsRow(parent, y, labelText)
         local card = new("Frame", { Size=UDim2.new(1,0,0,ROW_H), Position=UDim2.fromOffset(0,y), BackgroundColor3=C.card, BackgroundTransparency=0.2, BorderSizePixel=0, ZIndex=3, Active=true }, parent)
@@ -2683,7 +3442,7 @@ confirmYes.MouseButton1Click:Connect(function()
 end)
 
 ----------------------------------------------------------------------
--- TOGGLE LOGIC (smooth, no shake)
+-- TOGGLE LOGIC
 ----------------------------------------------------------------------
 local function setToggleVisual(sw, knob, enabled, bubbly)
     tween(sw, 0.18, { BackgroundColor3 = enabled and C.toggleOn or C.toggleOff })
@@ -2844,19 +3603,90 @@ local function flashAnswerBox(color)
     TweenService:Create(st, TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 0.4, Color = C.cardBorder}):Play()
 end
 
+-- ⭐ Decode HTML entities (fixes "&apos;" breaking riddles like TODAY'S DAY)
+local function decodeHtmlEntities(text)
+    if not text then return text end
+    text = text:gsub("&apos;", "'"):gsub("&#39;", "'")
+    text = text:gsub("&quot;", '"'):gsub("&#34;", '"')
+    text = text:gsub("&amp;", "&"):gsub("&#38;", "&")
+    text = text:gsub("&lt;", "<"):gsub("&gt;", ">")
+    text = text:gsub("&nbsp;", " ")
+    text = text:gsub("&#(%d+);", function(n)
+        local c = tonumber(n); return c and string.char(c) or ""
+    end)
+    text = text:gsub("&[%w#]+;", "")
+    return text
+end
+
 local function handleRiddle(rawText)
     if isSoldOutOrInvalid(rawText) then return end
+    rawText = decodeHtmlEntities(rawText)
     UI.qText.Text = rawText
     UI.qText.TextColor3 = C.txt
     if not riddleSolverEnabled then
         UI.aText.Text = "Riddler is OFF"; UI.aText.TextColor3 = C.dim; return
     end
-    if not Riddle.isActual(rawText) then return end
+    if not Riddle.isRiddleLike(rawText) then return end
     UI.addConsoleLine("Riddle: "..rawText, "riddle")
     UI.aText.Text = "solving…"; UI.aText.TextColor3 = C.yellow
-    local answer = MemoryBank.answer(rawText)
-    local source = "memory"
-    if not answer then answer = Riddle.solve(rawText); source = "knowledge" end
+
+    -- ⭐ Full multi-part solve FIRST (handles "X and Y and Z" natively)
+    local fullSolve = Riddle.solve(rawText)
+    local memAns = MemoryBank.answer(rawText)
+    local kbAns, _, kbPat, kbScore = nil, nil, nil, nil
+    if Riddle.findFirstMatch then
+        kbAns, _, kbPat, kbScore = Riddle.findFirstMatch(rawText)
+    end
+    local kbWords = 0
+    if kbPat then for _ in kbPat:gmatch("%S+") do kbWords = kbWords + 1 end end
+
+    local answer, source
+    if fullSolve and #fullSolve > 0 then
+        answer, source = fullSolve, "knowledge"
+    elseif memAns and #memAns > 0 then
+        answer, source = memAns, "memory"
+    elseif kbAns and kbScore and kbScore >= 100 and kbWords >= 2 then
+        answer, source = kbAns, "knowledge"
+    elseif kbAns and #kbAns > 0 then
+        answer, source = kbAns, "knowledge"
+    end
+
+    -- ⭐ Fallback: if full solve failed, try the BASE (before last "and")
+    if not answer then
+        local baseOnly = rawText:match("^(.-)%s+and%s+")
+        if baseOnly then
+            local b = Riddle.solve(baseOnly)
+                or (Riddle.findFirstMatch and Riddle.findFirstMatch(baseOnly))
+                or MemoryBank.answer(baseOnly)
+            if b and #b > 0 then answer = b; source = "knowledge" end
+        end
+    end
+
+    -- ⭐ Suffix append: only when tail is a SINGLE word/number
+    --   "rarest brainrot and 67"     → POLAROIDINI + 67     = POLAROIDINI67
+    --   "rarest brainrot and summer" → POLAROIDINI + SUMMER = POLAROIDINISUMMER
+    if answer then
+        local baseText, suffixText = rawText:match("^(.-)%s+and%s+(.+)$")
+        if baseText and suffixText then
+            local s = suffixText:gsub("^%s+",""):gsub("%s+$","")
+            local wc = 0
+            for _ in s:gmatch("%S+") do wc = wc + 1 end
+            if wc == 1 then
+                local numOnly = s:match("^(%d+)$")
+                local append
+                if numOnly then append = numOnly
+                else
+                    local sAns = (Riddle.findFirstMatch and Riddle.findFirstMatch(s)) or Riddle.findByName(s)
+                    if sAns and #sAns > 0 then append = sAns
+                    else append = s:gsub("[^%w]",""):upper() end
+                end
+                if append and #append > 0 and not answer:find(append, 1, true) then
+                    answer = answer .. append
+                end
+            end
+        end
+    end
+
     if answer and #answer > 0 then
         lastRiddleText = rawText
         lastRiddleAnswer = answer
@@ -2906,9 +3736,14 @@ local function onAnnouncement(...)
         if l:find("%f[%a]when%f[%A]") then qCount = qCount + 1 end
         if l:find("%f[%a]why%f[%A]") then qCount = qCount + 1 end
         if l:find("%f[%a]how%f[%A]") then qCount = qCount + 1 end
-        local isQuestion = qCount >= 2 or rawText:find("%?") ~= nil
-        -- ⭐ FIX: also skip learning if this is a riddle pattern
-        if not isQuestion and not Riddle.isActual(rawText) and not l:find("spawned!") and not l:find("has spawned") and not l:find("code redeemed") and not l:find("you got") and not l:find("you received") and not l:find("congratulations") then
+        local isQuestion = qCount >= 1 or rawText:find("%?") ~= nil
+        local isCodeCue = Chk.isCodeCue(rawText)
+        -- ⭐ FIX: only learn from messages that contain personal pronouns
+        -- (prevents riddle answers like "ARGENTINA" from polluting memory)
+        local hasPersonalCue = l:find("%f[%a]i%f[%A]") or l:find("%f[%a]im%f[%A]") or l:find("%f[%a]my%f[%A]") or l:find("%f[%a]me%f[%A]") or l:find("%f[%a]we%f[%A]") or l:find("%f[%a]our%f[%A]") or l:find("%f[%a]sammy%f[%A]") or l:find("%f[%a]sammys%f[%A]")
+        local wordCountForFeed = 0
+        for _ in l:gmatch("%S+") do wordCountForFeed = wordCountForFeed + 1 end
+        if hasPersonalCue and wordCountForFeed >= 3 and not isQuestion and not isCodeCue and not Riddle.isActual(rawText) and not l:find("spawned!") and not l:find("has spawned") and not l:find("code redeemed") and not l:find("you got") and not l:find("you received") and not l:find("congratulations") then
             local learned = MemoryBank.feed(rawText)
             if learned and #learned > 0 then
                 for _, kv in ipairs(learned) do UI.typewriterLine("🧠 "..kv.k.." = "..kv.v, "mem", 0.012) end
@@ -2922,13 +3757,57 @@ local function onAnnouncement(...)
     if lower:find("code is", 1, true) or lower:find("use code", 1, true) or lower:find("riddle is", 1, true) or lower:find("question is", 1, true) or Riddle.isActual(rawText) then
         autoEnableOnCodeCue()
     end
+    local hadCodeCue = Chk.isActualCodeCue(rawText)
     local stripped = Util.stripCuePrefix(rawText)
     if stripped ~= "" and stripped ~= rawText then
         UI.addConsoleLine("Stripped: '"..stripped.."'", "system")
         rawText = stripped
         lower = rawText:lower()
     end
-    if listening and riddleSolverEnabled and rawText:find("%s") and not Chk.isCodeCue(rawText) then
+    -- ⭐ FIX: if original had "use code"/"code is" prefix, the text after the cue
+    -- IS the code verbatim — just strip spaces/punctuation and uppercase it.
+    -- Never run Riddle.solve here (it would substring-match "jandel" from
+    -- "jandel sucks 666" and drop the middle words).
+    if hadCodeCue then
+        -- ⭐ FIX: rawText is ALREADY stripped above; skip if it's just a bare cue
+        local bareCue = rawText:lower():gsub("[%s%p]+", "")
+        if bareCue == "" or bareCue == "usecode" or bareCue == "thecodeis"
+           or bareCue == "codeis" or bareCue == "riddleis"
+           or bareCue == "questionis" or bareCue == "usethiscode" then
+            UI.addConsoleLine("Ignored empty code cue", "system")
+            return
+        end
+        -- ⭐ try riddle KB first (exact multi-word match); else submit literal
+        --  - "code is the rarest brainrot"  → POLAROIDINI   (riddle match)
+        --  - "use code phoenix24"            → PHOENIX24     (literal)
+        --  - "use code tung tung tung"       → TUNGTUNGTUNG  (literal)
+        --  - "use code jandel sucks 666"     → JANDELSUCKS666 (literal)
+        local kbAns, kbPat, kbScore = nil, nil, nil
+        if Riddle.findFirstMatch then
+            kbAns, _, kbPat, kbScore = Riddle.findFirstMatch(rawText)
+        end
+        local kbWords = 0
+        if kbPat then for _ in kbPat:gmatch("%S+") do kbWords = kbWords + 1 end end
+        if kbAns and kbScore and kbScore >= 100 and kbWords >= 2 then
+            UI.aText.Text = kbAns; UI.aText.TextColor3 = C.green
+            UI.codeText.Text = kbAns; UI.codeText.TextColor3 = C.green
+            UI.addConsoleLine("Code (riddle): "..kbAns, "code")
+            queueRedeem(kbAns)
+        else
+            local cleaned = rawText:gsub("[^%w]",""):upper()
+            if #cleaned >= 2 then
+                UI.aText.Text = cleaned; UI.aText.TextColor3 = C.txt
+                UI.codeText.Text = cleaned; UI.codeText.TextColor3 = C.txt
+                UI.addConsoleLine("Code: "..cleaned, "code")
+                queueRedeem(cleaned)
+            else
+                UI.addConsoleLine("Ignored too-short code", "system")
+            end
+        end
+        return
+    end
+    -- After stripping, if it's multi-word, treat as riddle
+    if listening and riddleSolverEnabled and rawText:find("%s") then
         local key = rawText:lower():gsub("%s+", " ")
         local now = os.clock()
         if not riddleCooldown[key] or (now - riddleCooldown[key]) > 3 then
@@ -2976,9 +3855,12 @@ local function watchFB(obj, isInitialScan)
             if l:find("%f[%a]which%f[%A]") then qCount = qCount + 1 end
             if l:find("%f[%a]what%f[%A]") then qCount = qCount + 1 end
             if l:find("%f[%a]who%f[%A]") then qCount = qCount + 1 end
-            local isQ = qCount >= 2 or text:find("%?") ~= nil
-            -- ⭐ FIX: also skip learning if this is a riddle pattern
-            if not isQ and not Riddle.isActual(text) then
+            local isQ = qCount >= 1 or text:find("%?") ~= nil
+            -- ⭐ FIX: only learn when message has personal pronouns (prevents pollution)
+            local hasPersonalCue2 = l:find("%f[%a]i%f[%A]") or l:find("%f[%a]im%f[%A]") or l:find("%f[%a]my%f[%A]") or l:find("%f[%a]me%f[%A]") or l:find("%f[%a]we%f[%A]") or l:find("%f[%a]our%f[%A]") or l:find("%f[%a]sammy%f[%A]") or l:find("%f[%a]sammys%f[%A]")
+            local wc2 = 0
+            for _ in l:gmatch("%S+") do wc2 = wc2 + 1 end
+            if hasPersonalCue2 and wc2 >= 3 and not isQ and not Riddle.isActual(text) then
                 local learned = MemoryBank.feed(text)
                 if learned and #learned > 0 then
                     for _, kv in ipairs(learned) do UI.typewriterLine("🧠 "..kv.k.." = "..kv.v, "mem", 0.012) end
@@ -3177,7 +4059,7 @@ local inputConn = UserInputService.InputBegan:Connect(function(input, gpe)
 end)
 
 ----------------------------------------------------------------------
--- BOOT (smooth stagger, no shake)
+-- BOOT
 ----------------------------------------------------------------------
 task.spawn(function()
     task.wait(0.05)
