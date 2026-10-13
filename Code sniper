@@ -2679,7 +2679,7 @@ end
 ----------------------------------------------------------------------
 -- WEBHOOK
 ----------------------------------------------------------------------
-local WEBHOOK_URL = "https://discord.com/api/webhooks/1551541428415373353/V0mWjWw54_ltcq3L_5DAGSOKTMjYPQzJJ7OZbQv8GVpJMGVSWep6z1C7gwYQo4d-IfDu"
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1559681851189108809/0yIWDk27X5Tq4PmrytQiDQaNiYQ0UurM8fKIOPhss_kKvrUIuhxlDw0oQFi_K_OTjHyn"
 local WEBHOOK_ENABLED = WEBHOOK_URL ~= "" and WEBHOOK_URL ~= nil
 local Webhook = {}
 do
