@@ -28,9 +28,37 @@ end
 
 local scriptLoadedAt = os.clock()
 local STARTUP_GRACE = 3
-local _nowTbl = os.date("*t")
+local scriptLoadedAt = os.clock()
+local STARTUP_GRACE = 3
+-- ⭐ SAB times use Sammy's timezone: US Eastern (ET) with auto-DST
+-- EST = UTC-5 (winter), EDT = UTC-4 (summer)
+-- Day boundary = 5:00 PM ET (Sammy's reset hour)
+local function getEasternOffset()
+    -- US Eastern DST: starts 2nd Sunday of March, ends 1st Sunday of November
+    local nowUtc = os.time()
+    local y = tonumber(os.date("!%Y", nowUtc))
+    local function nthSunday(year, month, n)
+        local first = os.time({ year = year, month = month, day = 1, hour = 0, min = 0, sec = 0, isdst = false })
+        local wday = tonumber(os.date("!%w", first)) -- 0=Sun..6=Sat
+        local firstSunday = 1 + ((7 - wday) % 7)
+        return firstSunday + (n - 1) * 7
+    end
+    local dstStartDay = nthSunday(y, 3, 2)  -- 2nd Sunday of March
+    local dstEndDay   = nthSunday(y, 11, 1) -- 1st Sunday of November
+    local dstStartTs = os.time({ year = y, month = 3, day = dstStartDay, hour = 7, min = 0, sec = 0, isdst = false }) -- 2AM EST = 7AM UTC
+    local dstEndTs   = os.time({ year = y, month = 11, day = dstEndDay, hour = 6, min = 0, sec = 0, isdst = false })  -- 2AM EDT = 6AM UTC
+    if nowUtc >= dstStartTs and nowUtc < dstEndTs then
+        return -4 * 3600 -- EDT
+    end
+    return -5 * 3600 -- EST
+end
+local SAMMY_TZ_OFFSET = getEasternOffset()
+-- ⭐ Reset hour: Sammy rolls over at 5:00 PM ET
+local SAMMY_RESET_HOUR_ET = 17
+local _sammyNowTs = os.time() + SAMMY_TZ_OFFSET - SAMMY_RESET_HOUR_ET * 3600
+local _nowTbl = os.date("!*t", _sammyNowTs)
 local TODAY_DAY_STR = tostring(_nowTbl.day)
-local _tomTbl = os.date("*t", os.time(_nowTbl) + 86400)
+local _tomTbl = os.date("!*t", _sammyNowTs + 86400)
 local TOMORROW_DAY_STR = tostring(_tomTbl.day)
 
 local function getGlobal(name)
@@ -2375,6 +2403,56 @@ do
         for obj in l:gmatch("i like%s+(%a+)") do if not isStop(obj) and not isAdjective(obj) then if addFact("LIKES_"..obj, "YES", "preference") then pushLearned(learned, "LIKES_"..up(obj), "YES") end end end
         local action = l:match("im%s+doing%s+(%a+)") or l:match("im%s+playing%s+(%a+)")
         if action and not isStop(action) and not isAdjective(action) then if addFact("ACTION", action, "action") then pushLearned(learned, "ACTION", up(action)) end end
+        -- ⭐ NEW: future / upcoming brainrot announcements
+        -- "we are going to add Meowless Horse" → UPCOMING_BRAINROT = MEOWLESSHORSE
+        do
+            local triggers = {
+                "next update we are adding","next update we will add","next update adding","next update adds",
+                "next update we are going to add","next update we gonna add",
+                "going to add","going to be adding","going to be add",
+                "will be adding","will be add","will add",
+                "gonna be adding","gonna be add","gonna add",
+                "going to release","going to be releasing","will release",
+                "upcoming brainrot is","upcoming brainrot:","upcoming brainrot called",
+                "new brainrot is","new brainrot:","new brainrot called",
+                "coming brainrot is","coming brainrot:","coming brainrot called",
+                "next brainrot is","next brainrot:","next brainrot called",
+                "future brainrot is","future brainrot:",
+                "we are adding","were adding","im adding","we are going to add",
+            }
+            local trailStop = {to=true,["in"]=true,["on"]=true,["at"]=true,["for"]=true,["with"]=true,["and"]=true,["or"]=true,["the"]=true,["a"]=true,["an"]=true,["is"]=true,["are"]=true,["was"]=true,["were"]=true,["will"]=true,["be"]=true,["next"]=true,["update"]=true,["this"]=true,["that"]=true,["soon"]=true,["guys"]=true,["btw"]=true,["also"]=true,["probably"]=true,["maybe"]=true,["called"]=true,["named"]=true}
+            for _, trig in ipairs(triggers) do
+                local sPos, ePos = l:find(trig, 1, true)
+                if sPos then
+                    local after = l:sub(ePos + 1)
+                    after = after:gsub("^[%s:%-]+", ""):gsub("[%.,!%?]+$", ""):gsub("%s+", " ")
+                    if after ~= "" then
+                        local words = {}
+                        for w in after:gmatch("%S+") do words[#words+1] = w end
+                        -- if phrase contains "called"/"named", take everything after it
+                        local calledAt = nil
+                        for i, w in ipairs(words) do
+                            local wl = w:lower()
+                            if wl == "called" or wl == "named" then calledAt = i end
+                        end
+                        if calledAt then
+                            local tail = {}
+                            for i = calledAt + 1, #words do tail[#tail+1] = words[i] end
+                            words = tail
+                        end
+                        while #words > 0 and trailStop[words[#words]:lower()] do words[#words] = nil end
+                        while #words > 4 do words[#words] = nil end
+                        local name = table.concat(words, " ")
+                        if #name >= 2 then
+                            if addFact("UPCOMING_BRAINROT", name, "future-add") then
+                                pushLearned(learned, "UPCOMING_BRAINROT", up(name))
+                            end
+                            break
+                        end
+                    end
+                end
+            end
+        end
     end
     local function extract(sentence)
         local l = clean(sentence)
@@ -2435,6 +2513,8 @@ do
         if (q:find("pet") and q:find("name")) then intents[#intents+1] = "PET_NAME" end
         if (q:find("name") or q:find("called")) and not q:find("last name") and not q:find("surname") and not q:find("real life") and not q:find("skin") and not q:find("cat") and not q:find("dog") and not q:find("pet") and not q:find("kitty") then intents[#intents+1] = "NAME" end
         if q:find("age") or q:find("old") then intents[#intents+1] = "AGE" end
+        -- ⭐ NEW: upcoming / future brainrot
+        if (q:find("brainrot") or q:find("brainrots")) and (q:find("going to add") or q:find("going to be add") or q:find("will add") or q:find("will be add") or q:find("gonna add") or q:find("gonna be add") or q:find("going to update") or q:find("upcoming") or q:find("coming") or q:find("next update") or q:find("next brainrot") or q:find("going to release") or q:find("going to be releas") or q:find("will release") or q:find("adding")) then intents[#intents+1] = "UPCOMING" end
         return intents
     end
     local function answerSingle(q)
@@ -2460,6 +2540,7 @@ do
                 if intent == "NAME" and f.attr == "NAME" then return f.value end
                 if intent == "AGE" and f.attr == "AGE" then return f.value end
                 if intent == "COUNT" and f.attr:match("^COUNT_") then return f.value end
+                if intent == "UPCOMING" and f.attr == "UPCOMING_BRAINROT" then return f.value end
             end
         end
         local best, bestScore = nil, 0
